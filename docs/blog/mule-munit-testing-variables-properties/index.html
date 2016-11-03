@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+  <meta charset="utf-8"/>
+  <title>Mule MUnit testing with variables and properties</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="null">
+  <meta name="author" content="null">
+  <meta name="keywords" content="[munit, flow-variables]">
+  <meta name="generator" content="JBake">
+
+  <link href="https://fonts.googleapis.com/css?family=Rokkitt" rel="stylesheet">
+  <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet">
+  <!-- Le styles -->
+  <link href="../../resources/css/bootstrap.min.css" rel="stylesheet">
+  <link href="../../resources/css/asciidoctor.css" rel="stylesheet">
+  <link href="../../resources/css/base.css" rel="stylesheet">
+  <link href="../../resources/css/prettify.css" rel="stylesheet">
+
+	<script src="../../resources/js/jquery-1.11.1.min.js"></script>
+    <script src="../../resources/js/bootstrap.min.js"></script>
+    <script src="../../resources/js/prettify.js"></script>
+	
+
+  <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
+  <!--[if lt IE 9]>
+    <script src="../../resources/js/html5shiv.min.js"></script>
+  <![endif]-->
+
+  <!-- Fav and touch icons -->
+  <link rel="apple-touch-icon" sizes="57x57" href="../../resources/ico/apple-icon-57x57.png">
+<link rel="apple-touch-icon" sizes="60x60" href="../../resources/ico/apple-icon-60x60.png">
+<link rel="apple-touch-icon" sizes="72x72" href="../../resources/ico/apple-icon-72x72.png">
+<link rel="apple-touch-icon" sizes="76x76" href="../../resources/ico/apple-icon-76x76.png">
+<link rel="apple-touch-icon" sizes="114x114" href="../../resources/ico/apple-icon-114x114.png">
+<link rel="apple-touch-icon" sizes="120x120" href="../../resources/ico/apple-icon-120x120.png">
+<link rel="apple-touch-icon" sizes="144x144" href="../../resources/ico/apple-icon-144x144.png">
+<link rel="apple-touch-icon" sizes="152x152" href="../../resources/ico/apple-icon-152x152.png">
+<link rel="apple-touch-icon" sizes="180x180" href="../../resources/ico/apple-icon-180x180.png">
+<link rel="icon" type="image/png" sizes="192x192"  href="../../resources/ico/android-icon-192x192.png">
+<link rel="icon" type="image/png" sizes="32x32" href="../../resources/ico/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="96x96" href="../../resources/ico/favicon-96x96.png">
+<link rel="icon" type="image/png" sizes="16x16" href="../../resources/ico/favicon-16x16.png">
+<link rel="manifest" href="../../resources/ico/manifest.json">
+<meta name="msapplication-TileColor" content="#ffffff">
+<meta name="msapplication-TileImage" content="../../resources/ico/ms-icon-144x144.png">
+<meta name="theme-color" content="#ffffff">
+  <link rel="shortcut icon" href="../../resources/ico/favicon.ico">
+  
+<!-- Begin Cookie Consent plugin by Silktide - http://silktide.com/cookieconsent -->
+<script type="text/javascript">
+    window.cookieconsent_options = {"message":"This website uses cookies to ensure you get the best experience on our website. If you continue to use this site, you agree to our use of cookies.","dismiss":"Got it!","learnMore":"More info","link":"/terms-usage-privacy/","theme":"dark-floating"};
+</script>
+
+<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/cookieconsent2/1.0.10/cookieconsent.min.js"></script>
+<!-- End Cookie Consent plugin -->
+
+  
+</head>
+
+  <body onload="prettyPrint()">
+    <div id="wrap">
+		  <div class="container">
+		
+<header>
+          <!-- Navigation -->
+    <nav class="navbar navbar-inverse navbar-custom navbar-fixed-top">
+        <div class="container">
+            <!-- Brand and toggle get grouped for better mobile display -->
+            <div class="navbar-header page-scroll">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                
+                <a class="navbar-brand plain" href="/" class="plain">
+                	<img src="../../resources/ico/icon.png" alt="" class="site-logo img-responsive"/>Unit Testers
+                </a>
+            </div>
+
+            <!-- Collect the nav links, forms, and other content for toggling -->
+            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                <ul class="nav navbar-nav navbar-right">
+                	<li>
+                        <a class="plain" href="/">Home</a>
+                    </li>
+                    <li class="dropdown">
+			          <a href="#" class="dropdown-toggle plain" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Categories <span class="caret"></span></a>
+			          <ul class="dropdown-menu">
+			            
+								<li><a class="plain" href="/categories/Unit-Testing"/>Unit Testing</a></li>
+							
+								<li><a class="plain" href="/categories/MUnit"/>MUnit</a></li>
+							
+			          </ul>
+			        </li>
+			        <li>
+                        <a class="plain" href="/archive.html">All Posts</a>
+                    </li>
+                    
+                    <li>
+                        <a class="plain" href="http://eepurl.com/b-IJAD" target="_blank">Subscribe</a>
+                    </li>
+                </ul>
+            </div>
+            <!-- /.navbar-collapse -->
+        </div>
+        <!-- /.container -->
+    </nav>
+
+
+</header>
+
+
+	
+	<div class="post">
+		<h1 class="post-title">Mule MUnit testing with variables and properties</h1>
+		<p class="post-meta">Published by Manik Magar on 30 May 2016 under <a href="/categories/MUnit">MUnit</a>
+		</p>
+		
+		<div class="post-summary">
+			<p></p>
+		</div>
+		<div>
+			<p class="post-content"> <p>Flow Variables, Session Variables, Inbound/Outbound properties are very common in mule flows. Mule MUnit framework makes it very easy to unit test any Mule Flow and subflows. In this post, we will see how we can unit test our flows involving variables and properties.</p>
+<p>Let’s consider a simple mule flow that reads a file and then sets a flow variable and session variable.</p>
+<p><img src="/blog/blog-files/Mule_Munit_Flow_1.png" alt="Mule Munit Flow" /></p>
+<pre><code>&lt;flow name=&quot;SampleMuleFlow&quot;&gt;
+        &lt;file:inbound-endpoint path=&quot;input&quot; responseTimeout=&quot;10000&quot; doc:name=&quot;File&quot;/&gt;
+        &lt;set-variable variableName=&quot;fileName&quot; value=&quot;#[message.inboundProperties.originalFilename]&quot; doc:name=&quot;Variable&quot;/&gt;
+        &lt;set-session-variable variableName=&quot;sessFileName&quot; value=&quot;#[flowVars.fileName]&quot; doc:name=&quot;Session Variable&quot;/&amp;gt
+        &lt;logger message=&quot;#[payload]&quot; level=&quot;INFO&quot; doc:name=&quot;Logger&quot;/&gt;
+    &lt;/flow&gt;
+</code></pre>
+<h2>Creating XML MUnit Test Case</h2>
+<p>If you are using Anypoint Studio, then you can right click our flow, choose MUnit –&gt; Create New Suite. Studio will automatically create an MUnit Test suite under /src/test/munit and adds a test case to it. It should look like –</p>
+<p><img src="/blog/blog-files/testmule-munit-xml-testcase.png" alt="testmule-munit-xml-testcase" /></p>
+<h3>What we will do here –</h3>
+<ol>
+  <li>MUnit mocks all inbound connectors and endpoints, so we will need to manually set the test message for the flow. We will do that by adding <code>&lt;munit:set&gt;</code> component. We will also set an inbound property originalFilename and invocation/flow variable on the message.</li>
+  <li>Call our main flow with using flow-ref</li>
+  <li>After main flow is executed, we will verify that flow variable value is same as what we set on message.</li>
+</ol>
+<p>Our final XML Unit Test –</p>
+<pre><code>&lt;munit:test name=&quot;testmule-test-suite-SampleMuleFlowTest&quot; description=&quot;Test&quot;&gt;
+    	&lt;munit:set payload=&quot;#[getResources(&#39;test.txt&#39;).asStream()]&quot; doc:name=&quot;Set Message&quot;&gt;
+            &lt;munit:invocation-properties&gt;
+                &lt;munit:invocation-property key=&quot;fileName2&quot; value=&quot;test2.txt&quot;/&gt;
+            &lt;/munit:invocation-properties&gt;
+            &lt;munit:inbound-properties&gt;
+                &lt;munit:inbound-property key=&quot;originalFilename&quot; value=&quot;test.txt&quot;/&gt;
+            &lt;/munit:inbound-properties&gt;
+    	&lt;/munit:set&gt;
+        &lt;flow-ref name=&quot;SampleMuleFlow&quot; doc:name=&quot;Flow-ref to SampleMuleFlow&quot;/&gt;
+        &lt;munit:assert-on-equals expectedValue=&quot;#[flowVars.fileName2]&quot; actualValue=&quot;#[&#39;test2.txt&#39;]&quot; doc:name=&quot;Assert Equals&quot;/&gt;
+    &lt;/munit:test&gt;
+</code></pre>
+<p>We can then run this as a MUnit Test in studio.</p>
+<h2>Creating Java MUnit Test Case</h2>
+<p>For those who prefer writing Java instead of XML, MUnit framework provides fluent java api’s to be used with JUnit. You can create java class by extending <code>FunctionalMunitSuite</code> class.</p>
+<p>Below is our java test case –</p>
+<pre><code>package testmule;
+
+import java.io.InputStream;
+
+import org.junit.Assert;
+import org.junit.Test;
+import org.mule.api.MuleEvent;
+import org.mule.api.MuleMessage;
+import org.mule.api.transport.PropertyScope;
+import org.mule.munit.runner.functional.FunctionalMunitSuite;
+
+public class SampleTestCase extends FunctionalMunitSuite {
+
+	@Override
+	protected String getConfigResources() {
+		return &quot;testmule2.xml&quot;;
+	}
+	
+	@Test
+	public void testSampleFlow(){
+		InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream(&quot;test.txt&quot;);
+		MuleMessage msg = muleMessageWithPayload(is);
+		try {
+			msg.setProperty(&quot;originalFileName&quot;, &quot;test.txt&quot;, PropertyScope.INBOUND);
+			MuleEvent test = testEvent(msg);
+			
+			test.setFlowVariable(&quot;fileName2&quot;, &quot;test2.txt&quot;);
+			
+			MuleEvent reply = runFlow(&quot;SampleMuleFlow&quot;, test);
+			
+			Assert.assertEquals(&quot;Verify Flow Variable&quot;, &quot;test2.txt&quot;, reply.getFlowVariable(&quot;fileName2&quot;));
+			
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+				
+	}
+}
+
+</code></pre>
+<p>Points to note –</p>
+<ol>
+  <li>Create a MuleMessage using muleMessageWithPayload function provided by FunctionalMunitSuite super class.</li>
+  <li>Creating a MuleEvent using testEvent function provided by FunctionalMunitSuite super class.</li>
+  <li>Inbound and Outbound properties can be set on the Message we created. For flow variables and session variables, we will use the test MuleEvent. testEvent(msg) method do not copy flow variables and session variables into test event so setting anything on msg will get lost while creating test event.</li>
+  <li>Finally, we call our main flow and verify the value of our flow variable in returned message<br/>So keep testing your code!</li>
+</ol>
+<p><strong>More Reading –</strong></p>
+<p><a href="https://docs.mulesoft.com/munit/v/1.1.1/">MUnit Documentation</a></p> </p>
+		</div>
+		<p class="post-tags"> Tags:  <a href="/tags/munit.html">munit</a> <a href="/tags/flow-variables.html">flow-variables</a>  </p>
+		<div class="social">
+<div class="container">
+    <div class="btn-group">
+        <button class="btn btn-default disabled">Share:</button> 
+        <a class="btn btn-default" target="_blank" title="Like On Facebook" href="http://www.facebook.com/plugins/like.php?href=https://unittesters.com/blog/mule-munit-testing-variables-properties/">
+            <i class="fa fa-thumbs-o-up fa-lg fb"></i>
+        </a>
+        <a class="btn btn-default" target="_blank" title="On Facebook" href="http://www.facebook.com/sharer.php?u=https://unittesters.com/blog/mule-munit-testing-variables-properties/&amp;t=Mule MUnit testing with variables and properties">
+            <i class="fa fa-facebook fa-lg fb"></i>
+        </a>
+        <a class="btn btn-default" target="_blank" title="On Twitter" href="http://twitter.com/share?url=https://unittesters.com/blog/mule-munit-testing-variables-properties/&amp;text=Mule MUnit testing with variables and properties">
+            <i class="fa fa-twitter fa-lg tw"></i>
+        </a>
+        <a class="btn btn-default" target="_blank" title="On Google Plus" href="https://plusone.google.com/_/+1/confirm?hl=en&amp;url=https://unittesters.com/blog/mule-munit-testing-variables-properties/">
+            <i class="fa fa-google-plus fa-lg google"></i>
+        </a>
+        <a class="btn btn-default" target="_blank" title="On LinkedIn" href="http://www.linkedin.com/shareArticle?mini=true&amp;url=https://unittesters.com/blog/mule-munit-testing-variables-properties/">
+            <i class="fa fa-linkedin fa-lg linkin"></i>
+        </a>
+        <a class="btn btn-default" target="_blank" title="Pin It" href="http://www.pinterest.com/pin/create/button/?url=https://unittesters.com/blog/mule-munit-testing-variables-properties/&amp;media=null&amp;description=Mule MUnit testing with variables and properties">
+            <i class="fa fa-pinterest fa-lg pinterest"></i>
+        </a>
+    </div>
+</div>
+</div>
+		
+	</div>
+	
+	
+<section class="disqus">
+  <div id="disqus_thread"></div>
+  <script type="text/javascript">
+    var disqus_shortname = 'unittesters';
+
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+  </script>
+  <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+  <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+</section>
+
+
+	
+		<div id="tagsCloud">
+			<hr/>
+			<h4>Tags Cloud</h4>
+			
+				<a class="plain" href="/tags/flow-variables.html"/>flow-variables</a> | 
+			
+				<a class="plain" href="/tags/munit.html"/>munit</a> | 
+			
+				<a class="plain" href="/tags/Transform-Message.html"/>Transform-Message</a> | 
+			
+				<a class="plain" href="/tags/DataWeave.html"/>DataWeave</a> | 
+			
+				<a class="plain" href="/tags/FunctionalMunitSuite.html"/>FunctionalMunitSuite</a> | 
+			
+				<a class="plain" href="/tags/Mule-ESB.html"/>Mule-ESB</a> | 
+			
+				<a class="plain" href="/tags/Properties-placeholder.html"/>Properties-placeholder</a> | 
+			
+				<a class="plain" href="/tags/Testing.html"/>Testing</a> | 
+			
+		
+		<div>
+		<div id="push"></div>
+
+			
+		<div id="mailChimp">
+				
+		
+		</div>
+		
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-78784632-1', 'auto');
+  ga('send', 'pageview', {
+    'page': 'blog/mule-munit-testing-variables-properties/ ',
+    'title': 'Mule MUnit testing with variables and properties '
+      });
+
+</script>
+
+
+
+		<footer>
+					<hr/>
+			<p class="muted credit">UnitTesters.com &copy; 2016 | Baked with <a href="https://github.com/myjavaacademy/jbake">JBake</a> | <a href="/sitemap.xml">Sitemap </a> | <a href="/terms-usage-privacy/">Terms of Use and Privacy Policy</a> | <a class="plain" href="/feed.xml"><i class="fa fa-rss-square" aria-hidden="true"></i> RSS Feed</a></p>
+	       
+		</footer>
+
+  
+  </body>
+</html>
+

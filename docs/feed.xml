@@ -1,0 +1,654 @@
+<?xml version="1.0"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>JBake</title>
+    <link>https://unittesters.com</link>
+    <atom:link href="https://unittesters.com/feed.xml" rel="self" type="application/rss+xml" />
+    <description>JBake Bootstrap Template</description>
+    <language>en-gb</language>
+    <pubDate>Wed, 2 Nov 2016 22:44:06 -0400</pubDate>
+    <lastBuildDate>Wed, 2 Nov 2016 22:44:06 -0400</lastBuildDate>
+
+    
+    <item>
+      <title>Unit Testing DataWeave JSON Output with MUnit</title>
+      <link>https://unittesters.com/blog/2016/09/27/Unit-Testing-DataWeave-JSON-Output-with-MUnit/</link>
+      <pubDate>Tue, 27 Sep 2016 00:00:00 -0400</pubDate>
+      <guid isPermaLink="false">blog/2016/09/27/Unit-Testing-DataWeave-JSON-Output-with-MUnit/</guid>
+      <description>
+      &lt;p&gt;In the &lt;a href=&quot;https://unittesters.com/blog/2016/07/20/Unit-Testing-Mule-DataWeave-Scripts-with-MUnit/&quot;&gt;previous post&lt;/a&gt; about unit testing DataWeave scripts with MUnit and JUnit, I showed you how to verify Java and CSV output of DataWeave scripts. We also looked at some error troubleshooting in dataweave scripts. &lt;/p&gt;
+&lt;p&gt;Now, lets look at DataWeave with JSON output and how we can test the content of our output with MUnit and JUnit.&lt;/p&gt;
+&lt;h2&gt;DataWeave Script&lt;/h2&gt;
+&lt;p&gt;Let&apos;s use the same DataWeave script from our &lt;a href=&quot;https://unittesters.com/blog/2016/07/20/Unit-Testing-Mule-DataWeave-Scripts-with-MUnit/&quot;&gt;previous post&lt;/a&gt; and change the output type to &lt;code&gt;application/json&lt;/code&gt;.&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&quot;scala&quot;&gt;%dw 1.0
+%output application/json
+---
+payload.root.*employee map {
+
+		name: $.fname ++ &amp;#39; &amp;#39; ++ $.lname,
+		dob: $.dob,
+		age: (now as :string {format: &amp;quot;yyyy&amp;quot;}) -  
+				(($.dob as :date {format:&amp;quot;MM-dd-yyyy&amp;quot;}) as :string {format:&amp;quot;yyyy&amp;quot;})
+
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h4&gt;Input XML Payload:&lt;/h4&gt;
+&lt;pre&gt;&lt;code class=&quot;xml&quot;&gt;&amp;lt;?xml version=&amp;#39;1.0&amp;#39; encoding=&amp;#39;UTF-8&amp;#39;?&amp;gt;
+&amp;lt;root&amp;gt;
+	&amp;lt;employee&amp;gt;
+		&amp;lt;fname&amp;gt;M1&amp;lt;/fname&amp;gt;
+		&amp;lt;lname&amp;gt;M2&amp;lt;/lname&amp;gt;
+		&amp;lt;dob&amp;gt;01-01-1980&amp;lt;/dob&amp;gt;
+	&amp;lt;/employee&amp;gt;
+	&amp;lt;employee&amp;gt;
+		&amp;lt;fname&amp;gt;A1&amp;lt;/fname&amp;gt;
+		&amp;lt;lname&amp;gt;A2&amp;lt;/lname&amp;gt;
+		&amp;lt;dob&amp;gt;12-23-1995&amp;lt;/dob&amp;gt;
+	&amp;lt;/employee&amp;gt;
+&amp;lt;/root&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h4&gt;Expected output:&lt;/h4&gt;
+&lt;pre&gt;&lt;code class=&quot;json&quot;&gt;[
+  {
+    &amp;quot;name&amp;quot;: &amp;quot;M1 M2&amp;quot;,
+    &amp;quot;dob&amp;quot;: &amp;quot;01-01-1980&amp;quot;,
+    &amp;quot;age&amp;quot;: 36
+  },
+  {
+    &amp;quot;name&amp;quot;: &amp;quot;A1 A2&amp;quot;,
+    &amp;quot;dob&amp;quot;: &amp;quot;12-23-1995&amp;quot;,
+    &amp;quot;age&amp;quot;: 21
+  }
+]
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h2&gt;Writing MUnit XML Test Case&lt;/h2&gt;
+&lt;p&gt;As we saw in previous post, output of DataWeave will be instance of WeaveOutputHandler class. Any transformer capable of consuming output streams can consume this output. As we are expecting json output, we will use &lt;code&gt;json-to-object-transformer&lt;/code&gt; with a return class of &lt;code&gt;java.util.ArrayList&lt;/code&gt;. Once we have the java list of json, we can validate any data elements. Here is out xml test case -&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&quot;xml&quot;&gt;    &amp;lt;munit:test name=&amp;quot;dataweave-testing-suite-jsonTest&amp;quot; description=&amp;quot;MUnit Test&amp;quot;&amp;gt;
+        &amp;lt;munit:set payload=&amp;quot;#[getResource(&amp;#39;sample_data/employees.xml&amp;#39;).asStream()]&amp;quot; mimeType=&amp;quot;application/xml&amp;quot; doc:name=&amp;quot;Set Message&amp;quot;/&amp;gt;
+        &amp;lt;flow-ref name=&amp;quot;dataweave-testingSub_Flow&amp;quot; doc:name=&amp;quot;dataweave-testingSub_Flow&amp;quot;/&amp;gt;
+        &amp;lt;json:json-to-object-transformer returnClass=&amp;quot;java.util.ArrayList&amp;quot; doc:name=&amp;quot;JSON to Object&amp;quot;/&amp;gt;
+        &amp;lt;munit:assert-on-equals expectedValue=&amp;quot;#[2]&amp;quot; actualValue=&amp;quot;#[payload.size()]&amp;quot; doc:name=&amp;quot;Assert Equals&amp;quot;/&amp;gt;
+        &amp;lt;munit:assert-on-equals expectedValue=&amp;quot;#[36]&amp;quot; actualValue=&amp;quot;#[payload[0].age]&amp;quot; doc:name=&amp;quot;Assert Equals&amp;quot;/&amp;gt;
+    &amp;lt;/munit:test&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;strong&gt;Note:&lt;/strong&gt; It may also be possible to convert the DataWeave output to JSON string and then use &lt;a href=&quot;https://docs.mulesoft.com/mule-user-guide/v/3.7/non-mel-expressions-configuration-reference#expression-evaluator-reference&quot;&gt;JSON evaluator&lt;/a&gt; for MEL Expression.&lt;/p&gt;
+&lt;h2&gt;Writing Java JUnit Test Case&lt;/h2&gt;
+&lt;p&gt;We can also use java to write our test case. Logic and steps will be similar to that of xml. Here is our java test case -&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&quot;java&quot;&gt;@Test
+	public void testJsonOutput() throws Exception {
+		String payload = FileUtils.readFileToString(
+				new File(DataWeaveTests.class.getClassLoader().getResource(&amp;quot;sample_data/employees.xml&amp;quot;).getPath()));
+
+		MuleEvent event = testEvent(payload);
+		((DefaultMuleMessage) event.getMessage()).setMimeType(MimeTypes.APPLICATION_XML);
+
+		MuleEvent reply = runFlow(&amp;quot;dataweave-testingSub_Flow&amp;quot;, event);
+
+		//Create and initialise JSON to Object transformer. All below steps are required.
+		JsonToObject jto = new JsonToObject();
+		jto.setMuleContext(muleContext);
+		jto.setReturnDataType(DataTypeFactory.create(ArrayList.class, HashMap.class));
+		jto.initialise();
+
+
+		List&amp;lt;Map&amp;gt; data = (List&amp;lt;Map&amp;gt;) jto.transform(reply.getMessage().getPayloadAsString(), reply);
+
+		Assert.assertEquals(2, data.size());
+		Assert.assertEquals(36, data.get(0).get(&amp;quot;age&amp;quot;));
+	}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;strong&gt;Note:&lt;/strong&gt; If you run into some error like &quot;more than one transformers found&quot; for getPayloadAsString() method, then try using &lt;code&gt;ObjectToString&lt;/code&gt; transformer to convert to dataweave output to String.&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&quot;java&quot;&gt;ObjectToString ots = new ObjectToString();
+		ots.setMuleContext(muleContext);
+		ots.initialise();
+		List&amp;lt;Map&amp;gt; data = (List&amp;lt;Map&amp;gt;) jto.transform(ots.transform(reply.getMessage().getPayload()), reply);
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;And That&apos;s all about it, so simple :)&lt;/p&gt;
+&lt;p&gt;Hope this helps to write safe code!&lt;/p&gt;
+	  </description>
+    </item>
+    
+    <item>
+      <title>Overriding Properties in MUnit XML and Java for testing</title>
+      <link>https://unittesters.com/blog/2016/07/24/overriding-properties-in-munit-xml-java-for-testing/</link>
+      <pubDate>Sun, 24 Jul 2016 00:00:00 -0400</pubDate>
+      <guid isPermaLink="false">blog/2016/07/24/overriding-properties-in-munit-xml-java-for-testing/</guid>
+      <description>
+      &lt;p&gt;It is very common for any mule application to use external properties files. &lt;strong&gt;In this post, we will see how we can override properties values for testing.&lt;/strong&gt; We will also cover how we can write to temporary folder during munit test, disable connector mocking and asserting file existence.&lt;/p&gt;
+&lt;p&gt;For demonstration purpose, we will have a flow that uses DataWeave to convert xml file into csv and writes to an output folder using &lt;code&gt;file:outbound-endpoint&lt;/code&gt;. Let&apos;s read the output path from properties file with key &lt;code&gt;explore.mule.target.folder&lt;/code&gt;. As we are going to write file during testing, we will need munit not to mock the connectors.&lt;/p&gt;
+&lt;p&gt;Here is our production code that declares a &lt;code&gt;context:property-placeholder&lt;/code&gt; to read properties from &lt;code&gt;src/main/resources/explore-mule.properties&lt;/code&gt;&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&quot;xml&quot;&gt;&amp;lt;?xml version=&amp;quot;1.0&amp;quot; encoding=&amp;quot;UTF-8&amp;quot;?&amp;gt;
+
+&amp;lt;mule xmlns:context=&amp;quot;http://www.springframework.org/schema/context&amp;quot;
+	xmlns:dw=&amp;quot;http://www.mulesoft.org/schema/mule/ee/dw&amp;quot;
+	xmlns:file=&amp;quot;http://www.mulesoft.org/schema/mule/file&amp;quot;
+	xmlns=&amp;quot;http://www.mulesoft.org/schema/mule/core&amp;quot; xmlns:doc=&amp;quot;http://www.mulesoft.org/schema/mule/documentation&amp;quot;
+	xmlns:spring=&amp;quot;http://www.springframework.org/schema/beans&amp;quot; version=&amp;quot;EE-3.8.0&amp;quot;
+	xmlns:xsi=&amp;quot;http://www.w3.org/2001/XMLSchema-instance&amp;quot;
+	xsi:schemaLocation=&amp;quot;
+http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-current.xsd 
+http://www.mulesoft.org/schema/mule/ee/dw http://www.mulesoft.org/schema/mule/ee/dw/current/dw.xsd 
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd&amp;quot;&amp;gt;
+
+    &amp;lt;context:property-placeholder location=&amp;quot;explore-mule.properties&amp;quot;/&amp;gt;
+ 
+
+    &amp;lt;flow name=&amp;quot;properties-testingFlow3&amp;quot;&amp;gt;
+        &amp;lt;file:inbound-endpoint path=&amp;quot;input3&amp;quot; moveToDirectory=&amp;quot;output&amp;quot; responseTimeout=&amp;quot;10000&amp;quot; doc:name=&amp;quot;File&amp;quot;/&amp;gt;
+        &amp;lt;dw:transform-message doc:name=&amp;quot;Transform Message&amp;quot;&amp;gt;
+            &amp;lt;dw:input-payload doc:sample=&amp;quot;sample_data/empty.xml&amp;quot;/&amp;gt;
+            &amp;lt;dw:set-payload resource=&amp;quot;classpath:dwl/employees2.dwl&amp;quot;/&amp;gt;
+        &amp;lt;/dw:transform-message&amp;gt;
+        &amp;lt;file:outbound-endpoint path=&amp;quot;${explore.mule.target.folder}&amp;quot; outputPattern=&amp;quot;output.csv&amp;quot; doc:name=&amp;quot;File&amp;quot;/&amp;gt;
+    &amp;lt;/flow&amp;gt;
+
+&amp;lt;/mule&amp;gt;
+
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h2&gt;Overriding Properties in XML&lt;/h2&gt;
+&lt;p&gt;Similar to specifying properties in production code, we can create a copy of properties files under &lt;code&gt;/src/test/resource/env/test/explore-mule.properties&lt;/code&gt; and refer to it inside xml using &lt;code&gt;context:property-placeholder&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;Below XML MUnit suite shows this option in action. In test explore-mule.properties, we set &lt;code&gt;explore.mule.target.folder=test-output&lt;/code&gt; and then verify that output.csv exists after test case executes. &lt;/p&gt;
+&lt;pre&gt;&lt;code class=&quot;xml&quot;&gt;&amp;lt;?xml version=&amp;quot;1.0&amp;quot; encoding=&amp;quot;UTF-8&amp;quot;?&amp;gt;
+
+&amp;lt;mule xmlns:context=&amp;quot;http://www.springframework.org/schema/context&amp;quot;
+	xmlns=&amp;quot;http://www.mulesoft.org/schema/mule/core&amp;quot; xmlns:doc=&amp;quot;http://www.mulesoft.org/schema/mule/documentation&amp;quot; xmlns:munit=&amp;quot;http://www.mulesoft.org/schema/mule/munit&amp;quot; xmlns:spring=&amp;quot;http://www.springframework.org/schema/beans&amp;quot; xmlns:core=&amp;quot;http://www.mulesoft.org/schema/mule/core&amp;quot; xmlns:xsi=&amp;quot;http://www.w3.org/2001/XMLSchema-instance&amp;quot; xsi:schemaLocation=&amp;quot;http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-current.xsd
+http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd&amp;quot;&amp;gt;
+
+ &amp;lt;context:property-placeholder location=&amp;quot;env/test/explore-mule.properties&amp;quot;/&amp;gt;
+ 
+    &amp;lt;munit:config name=&amp;quot;munit&amp;quot; doc:name=&amp;quot;MUnit configuration&amp;quot; mock-connectors=&amp;quot;false&amp;quot;/&amp;gt;
+    &amp;lt;spring:beans&amp;gt;
+        &amp;lt;spring:import resource=&amp;quot;classpath:sample-flows.xml&amp;quot;/&amp;gt;
+    &amp;lt;/spring:beans&amp;gt;
+    &amp;lt;munit:test name=&amp;quot;sample-flows-test-suite-properties-testingFlow3Test&amp;quot; description=&amp;quot;Test&amp;quot;&amp;gt;
+    	&amp;lt;munit:set
+			payload=&amp;quot;#[getResource(&amp;#39;sample_data/employees.xml&amp;#39;).asStream()]&amp;quot;
+			doc:name=&amp;quot;Set Message&amp;quot; mimeType=&amp;quot;application/xml&amp;quot; /&amp;gt;
+        &amp;lt;flow-ref name=&amp;quot;properties-testingFlow3&amp;quot; doc:name=&amp;quot;Flow-ref to properties-testingFlow3&amp;quot;/&amp;gt;
+        &amp;lt;munit:assert-true condition=&amp;quot;#[new java.io.File(&amp;#39;./test-output/output.csv&amp;#39;).exists()]&amp;quot; doc:name=&amp;quot;Assert True&amp;quot;/&amp;gt;
+        
+    &amp;lt;/munit:test&amp;gt;
+&amp;lt;/mule&amp;gt;
+
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Don&apos;t forget to disable connector mocking by adding &lt;code&gt;mock-connectors=&amp;quot;false&amp;quot;&lt;/code&gt; in &lt;code&gt;munit:config&lt;/code&gt;.&lt;/p&gt;
+&lt;h2&gt;Overriding Properties in FunctionalMunitSuite&lt;/h2&gt;
+&lt;p&gt;When you write a munit test case in java using FunctionalMunitSuite, it is more flexible to set properties. When &lt;code&gt;FunctionalMunitSuite&lt;/code&gt; creates the mocking configuration during init, it calls a protected method &lt;code&gt;protected Properties getStartUpProperties()&lt;/code&gt; to get the properties for tests. Default implementation in FunctionalMUnitSuite returns null but we can easily override this function in our test suite to return an instance of &lt;code&gt;java.util.Properties&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;One benefit of this over xml approach is, you get to use power of java while setting properties values. In this example, we will use &lt;code&gt;org.junit.rules.TemporaryFolder&lt;/code&gt; to create a temporary folder and set that as a target folder. If we really use this as a junit &lt;code&gt;Rule&lt;/code&gt; then JUnit can take care of deleting temporary folder, but here we can use that as rule because &lt;code&gt;getStartUpProperties&lt;/code&gt; is called once a testSuite/context initialization so we will keep reference to our properties and folders. So we will also add an &lt;code&gt;AfterClass&lt;/code&gt; method to delete this folder.&lt;/p&gt;
+&lt;p&gt;Below Java code shows this in action. At the end of our test case, we assert that the target temporary folder contains output.csv. &lt;/p&gt;
+&lt;pre&gt;&lt;code class=&quot;java&quot;&gt;package com.mms.mule.explore;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.Properties;
+
+import org.hamcrest.MatcherAssert;
+import org.hamcrest.Matchers;
+import org.junit.AfterClass;
+import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
+import org.mule.DefaultMuleMessage;
+import org.mule.api.MuleEvent;
+import org.mule.munit.runner.functional.FunctionalMunitSuite;
+import org.mule.transformer.types.MimeTypes;
+import org.mule.util.FileUtils;
+
+public class PropertiesTestSuite extends FunctionalMunitSuite {
+
+	private Properties props;
+	private static TemporaryFolder tempFolder;
+	
+	@Override
+	protected String getConfigResources() {
+		return &amp;quot;sample-flows.xml&amp;quot;;
+	}
+	
+	@Override
+	protected boolean haveToMockMuleConnectors() {
+		return false;
+	}
+	
+	@AfterClass
+	public static void cleanup(){
+		tempFolder.delete();
+	}
+	
+	@Override
+	protected Properties getStartUpProperties() {
+		props = super.getStartUpProperties();
+		if(props == null){
+			props = new Properties();
+		}
+		tempFolder = new TemporaryFolder();
+		try {
+			tempFolder.create();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		String path =tempFolder.getRoot().getAbsolutePath();
+		System.out.println(&amp;quot;Setting path to - &amp;quot;+ path);
+		props.setProperty(&amp;quot;explore.mule.target.folder&amp;quot;, path);
+		
+		return props;
+	}
+	
+	@Test
+	public void testFileWriting() throws Exception{
+		String payload = FileUtils.readFileToString(new File(DataWeaveTests.class.getClassLoader().getResource(&amp;quot;sample_data/employees.xml&amp;quot;).getPath()));
+		
+		MuleEvent event = testEvent(payload);
+		((DefaultMuleMessage)event.getMessage()).setMimeType(MimeTypes.APPLICATION_XML);
+		
+		MuleEvent reply = runFlow(&amp;quot;properties-testingFlow3&amp;quot;, event);
+		
+		MatcherAssert.assertThat(new File(tempFolder.getRoot(), &amp;quot;output.csv&amp;quot;).exists(),Matchers.equalTo(Boolean.TRUE));
+	}
+}
+
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Don&apos;t forget to override &lt;code&gt;haveToMockMuleConnectors()&lt;/code&gt; and return false to allow file writing.&lt;/p&gt;
+&lt;p&gt;As an alternative to overriding &lt;code&gt;getStartUpProperties&lt;/code&gt; method, you can also create a sample munit xml config with context:properties-placeholder and then use that inside &lt;code&gt;getConfigResources()&lt;/code&gt; method.&lt;/p&gt;
+&lt;h2&gt;Test Application Source&lt;/h2&gt;
+&lt;p&gt;Test Application source code is available on Github &lt;a href=&quot;https://github.com/UnitTesters/explore-mule&quot;&gt;here&lt;/a&gt;.&lt;/p&gt;
+&lt;h2&gt;Conclusion&lt;/h2&gt;
+&lt;p&gt;MUnit provides a very stable environment for testing mule flows. You can easily override your production properties inside MUnit XML as well as Java test suite.&lt;/p&gt;
+	  </description>
+    </item>
+    
+    <item>
+      <title>Unit Testing Mule DataWeave Scripts with MUnit</title>
+      <link>https://unittesters.com/blog/2016/07/20/Unit-Testing-Mule-DataWeave-Scripts-with-MUnit/</link>
+      <pubDate>Wed, 20 Jul 2016 00:00:00 -0400</pubDate>
+      <guid isPermaLink="false">blog/2016/07/20/Unit-Testing-Mule-DataWeave-Scripts-with-MUnit/</guid>
+      <description>
+      &lt;p&gt;&lt;a href=&quot;https://docs.mulesoft.com/mule-user-guide/v/3.8/dataweave&quot;&gt;DataWeave&lt;/a&gt; is a powerful transformation language introduced with Mule Enterprise Edition 3.7. It allows you to transform data from one format to another and supports CSV, XML, JSON, Flat/Fixed Width (v3.8+) &amp;amp; Java. You can look at &lt;a href=&quot;https://docs.mulesoft.com/mule-user-guide/v/3.8/dataweave-examples&quot;&gt;these DataWeave Examples&lt;/a&gt; to see it in action.&lt;/p&gt;
+&lt;p&gt;Like any other code of programming world, it is always a good idea to unit test the DataWeave script you write. In this post, we will see how we can unit test the DataWeave code.&lt;/p&gt;
+&lt;h2&gt;Writing DataWeave Script&lt;/h2&gt;
+&lt;p&gt;DataWeave script can be included in two ways into Mule flow - &lt;/p&gt;
+&lt;h4&gt;1. Add an inline script -&lt;/h4&gt;
+&lt;pre&gt;&lt;code class=&quot;xml&quot;&gt;&amp;lt;dw:transform-message doc:name=&amp;quot;Transform Message&amp;quot;&amp;gt;
+            &amp;lt;dw:set-payload&amp;gt;&amp;lt;![CDATA[%dw 1.0
+%output application/java
+---
+{
+	employees: payload.root.*employee map {
+		
+			name: $.fname ++ &amp;#39; &amp;#39; ++ $.lname,
+			dob: $.dob,
+			age: (now as :string {format: &amp;quot;yyyy&amp;quot;}) - 
+					(($.dob as :date {format:&amp;quot;MM-dd-yyyy&amp;quot;}) as :string {format:&amp;quot;yyyy&amp;quot;})
+		
+	}
+}]]&amp;gt;&amp;lt;/dw:set-payload&amp;gt;
+        &amp;lt;/dw:transform-message&amp;gt;
+        
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h4&gt;2. Add script to file (.dwl) and refer with &lt;code&gt;resource&lt;/code&gt; attribute -&lt;/h4&gt;
+&lt;pre&gt;&lt;code class=&quot;xml&quot;&gt; &amp;lt;dw:transform-message doc:name=&amp;quot;Transform Message&amp;quot;&amp;gt;
+      &amp;lt;dw:set-payload resource=&amp;quot;classpath:dwl/employees.dwl&amp;quot;/&amp;gt;
+ &amp;lt;/dw:transform-message&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;I prefer using &lt;code&gt;resource&lt;/code&gt; option for writing my DataWeave scripts. This has few advantages over &lt;code&gt;inline&lt;/code&gt; option -&lt;/p&gt;
+&lt;ol&gt;
+  &lt;li&gt;
+  &lt;p&gt;Script (.dwl) is reusable by other trasnform messages components by referring to same file.&lt;/p&gt;&lt;/li&gt;
+  &lt;li&gt;
+  &lt;p&gt;Mule configuration xml file remains clean and readable.&lt;/p&gt;&lt;/li&gt;
+  &lt;li&gt;
+  &lt;p&gt;Most important for us, that makes it possible to test the script as an unit of code.&lt;/p&gt;&lt;/li&gt;
+  &lt;li&gt;
+  &lt;p&gt;Hmm, there may be more but I just don&apos;t know them yet :).&lt;/p&gt;&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;​&lt;/p&gt;
+&lt;h2&gt;Flow with DataWeave Script&lt;/h2&gt;
+&lt;p&gt;To keep demonstration simple, we will use below flow that consumes an employees.xml and transforms it to a Java Map. During transformation it also calculate employee&apos;s age.&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&quot;xml&quot;&gt;&amp;lt;?xml version=&amp;quot;1.0&amp;quot; encoding=&amp;quot;UTF-8&amp;quot;?&amp;gt;
+
+&amp;lt;mule xmlns:file=&amp;quot;http://www.mulesoft.org/schema/mule/file&amp;quot; xmlns:dw=&amp;quot;http://www.mulesoft.org/schema/mule/ee/dw&amp;quot; xmlns=&amp;quot;http://www.mulesoft.org/schema/mule/core&amp;quot; xmlns:doc=&amp;quot;http://www.mulesoft.org/schema/mule/documentation&amp;quot;
+	xmlns:spring=&amp;quot;http://www.springframework.org/schema/beans&amp;quot; 
+	xmlns:xsi=&amp;quot;http://www.w3.org/2001/XMLSchema-instance&amp;quot;
+	xsi:schemaLocation=&amp;quot;http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd
+http://www.mulesoft.org/schema/mule/ee/dw http://www.mulesoft.org/schema/mule/ee/dw/current/dw.xsd&amp;quot;&amp;gt;
+
+    &amp;lt;flow name=&amp;quot;dataweave-testingFlow&amp;quot;&amp;gt;
+        &amp;lt;file:inbound-endpoint path=&amp;quot;input&amp;quot; moveToDirectory=&amp;quot;output&amp;quot; responseTimeout=&amp;quot;10000&amp;quot; doc:name=&amp;quot;File&amp;quot;/&amp;gt;
+        &amp;lt;dw:transform-message doc:name=&amp;quot;Transform Message&amp;quot;&amp;gt;
+            &amp;lt;dw:set-payload resource=&amp;quot;classpath:dwl/employees.dwl&amp;quot;/&amp;gt;
+        &amp;lt;/dw:transform-message&amp;gt;
+        &amp;lt;logger level=&amp;quot;INFO&amp;quot; message=&amp;quot;#[message.payloadAs(java.lang.String)]&amp;quot; doc:name=&amp;quot;Logger&amp;quot;/&amp;gt;
+    &amp;lt;/flow&amp;gt;
+&amp;lt;/mule&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;strong&gt;DataWeave Script&lt;/strong&gt; - &lt;code&gt;employees.dwl&lt;/code&gt;&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;%dw 1.0
+%output application/java
+---
+employees: payload.root.*employee map {
+		
+			name: $.fname ++ &amp;#39; &amp;#39; ++ $.lname,
+			dob: $.dob,
+			age: (now as :string {format: &amp;quot;yyyy&amp;quot;}) - 
+					(($.dob as :date {format:&amp;quot;MM-dd-yyyy&amp;quot;}) as :string {format:&amp;quot;yyyy&amp;quot;})
+		
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h2&gt;First MUnit Test&lt;/h2&gt;
+&lt;p&gt;We will use &lt;a href=&quot;https://docs.mulesoft.com/munit/v/1.2.0/&quot;&gt;MUnit&lt;/a&gt; for writing our unit test cases. If you haven&apos;t written any munit test cases before then you can take a look at &lt;a href=&quot;https://docs.mulesoft.com/munit/v/1.2.0/munit-short-tutorial&quot;&gt;MUnit Tutorial&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;To write our first unit test, we will create a new MUnit Test suite &lt;code&gt;src/test/munit/dataweave-testing-test-suite.xml&lt;/code&gt; with below code -&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&quot;xml&quot;&gt;&amp;lt;?xml version=&amp;quot;1.0&amp;quot; encoding=&amp;quot;UTF-8&amp;quot;?&amp;gt;
+
+&amp;lt;mule xmlns:dw=&amp;quot;http://www.mulesoft.org/schema/mule/ee/dw&amp;quot; xmlns=&amp;quot;http://www.mulesoft.org/schema/mule/core&amp;quot;
+	xmlns:doc=&amp;quot;http://www.mulesoft.org/schema/mule/documentation&amp;quot;
+	xmlns:munit=&amp;quot;http://www.mulesoft.org/schema/mule/munit&amp;quot; xmlns:spring=&amp;quot;http://www.springframework.org/schema/beans&amp;quot;
+	xmlns:core=&amp;quot;http://www.mulesoft.org/schema/mule/core&amp;quot; xmlns:xsi=&amp;quot;http://www.w3.org/2001/XMLSchema-instance&amp;quot;
+	xsi:schemaLocation=&amp;quot;http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/ee/dw http://www.mulesoft.org/schema/mule/ee/dw/current/dw.xsd&amp;quot;&amp;gt;
+	&amp;lt;munit:config name=&amp;quot;munit&amp;quot; doc:name=&amp;quot;MUnit configuration&amp;quot; /&amp;gt;
+	
+  	&amp;lt;munit:test name=&amp;quot;dataweave-testing-test-suite-dataweave-testingFlowTest&amp;quot;
+		description=&amp;quot;Test&amp;quot;&amp;gt;
+		&amp;lt;munit:set
+			payload=&amp;quot;#[getResource(&amp;#39;sample_data/employees.xml&amp;#39;).asStream()]&amp;quot;
+			doc:name=&amp;quot;Set Message&amp;quot; mimeType=&amp;quot;application/xml&amp;quot; /&amp;gt;
+		&amp;lt;dw:transform-message doc:name=&amp;quot;Transform Message&amp;quot;&amp;gt;
+			&amp;lt;dw:set-payload resource=&amp;quot;classpath:dwl/employees.dwl&amp;quot; /&amp;gt;
+		&amp;lt;/dw:transform-message&amp;gt;
+		&amp;lt;munit:assert-on-equals expectedValue=&amp;quot;#[2]&amp;quot;
+			actualValue=&amp;quot;#[payload.employees.size()]&amp;quot; doc:name=&amp;quot;Assert Equals&amp;quot;
+			message=&amp;quot;Missing some employees&amp;quot; /&amp;gt;
+		&amp;lt;munit:assert-on-equals expectedValue=&amp;quot;#[36]&amp;quot;
+			actualValue=&amp;quot;#[payload.employees[0].age]&amp;quot; doc:name=&amp;quot;Assert Equals&amp;quot; /&amp;gt;
+	&amp;lt;/munit:test&amp;gt;
+&amp;lt;/mule&amp;gt;
+
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;This code has a munit test &lt;code&gt;dataweave-testing-test-suite-dataweave-testingFlowTest&lt;/code&gt;. You can see that we are not importing our actual flow config and that is because, we will add a &lt;code&gt;transform-message&lt;/code&gt; component and refer to the same dataweave script resource &lt;code&gt;dwl/employees.dwl&lt;/code&gt; that main flow uses (Reuse and unit testability of script!!). Here is what this test is doing -&lt;/p&gt;
+&lt;ol&gt;
+  &lt;li&gt;Create a test message using sample xml file as payload. We can use MEL expression to read file as stream. &lt;strong&gt;We will set the mimeType of message as &quot;application/xml&quot;.&lt;/strong&gt;&lt;/li&gt;
+  &lt;li&gt;Transform the input xml to csv using &lt;code&gt;employees.dwl&lt;/code&gt; script. As we are transforming it into java object, output of DW will be a HashMap with employee list.&lt;/li&gt;
+  &lt;li&gt;Assert the number of employees we except in dataweave output.&lt;/li&gt;
+  &lt;li&gt;For first employee record, assert the expected value of age. This will ensure that our age calculation is working as expected.&lt;/li&gt;
+&lt;/ol&gt;
+&lt;blockquote&gt;
+  &lt;p&gt;&lt;strong&gt;Important:&lt;/strong&gt; Not setting mimeType on test message will cause DataWeave to throw below exception because DataWeave will recieve the input as binary input stream and wouldn&apos;t know how to interpret content of it.&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;pre&gt;&lt;code class=&quot;java&quot;&gt;Message               : Exception while executing: 
+	employees: payload.root.*employee map {
+	           ^
+Type mismatch for &amp;#39;Value Selector&amp;#39; operator
+     found :binary, :name
+  required :datetime, :name or
+  required :localdatetime, :name or
+  required :object, :name or
+  required :time, :name or
+  required :array, :name or
+  required :date, :name or
+  required :localtime, :name or
+  required :period, :name
+Element               : /dataweave-testing-test-suite-dataweave-testingFlowTest/processors/1 @ 22f3f850-4d52-11e6-b92d-1a0124cf99a6:dataweave-testing-test-suite.xml:17 (Transform Message)
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Now Run this as MUnit Test case and you should see it running successfully -&lt;/p&gt;
+&lt;p&gt;&lt;img src=&quot;http://image.prntscr.com/image/ac611f8e9d0a4a809c8ac8997a3187df.png&quot; alt=&quot;MUnit Runner&quot; /&gt;&lt;/p&gt;
+&lt;h2&gt;Writing Java Unit Test Case&lt;/h2&gt;
+&lt;p&gt;For those who prefer to write java instead of XML, &lt;code&gt;FunctionalMunitSuite&lt;/code&gt; class can be used to write the test case.&lt;/p&gt;
+&lt;p&gt;Let&apos;s create a &lt;code&gt;src/test/munit/dataweave-testing-munit.xml&lt;/code&gt; mule config (not a munit xml suite) and add a test subflow with target dataweave component. We are using the same dwl resource file.&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&quot;xml&quot;&gt;&amp;lt;?xml version=&amp;quot;1.0&amp;quot; encoding=&amp;quot;UTF-8&amp;quot;?&amp;gt;
+
+&amp;lt;mule xmlns:dw=&amp;quot;http://www.mulesoft.org/schema/mule/ee/dw&amp;quot; xmlns=&amp;quot;http://www.mulesoft.org/schema/mule/core&amp;quot; xmlns:doc=&amp;quot;http://www.mulesoft.org/schema/mule/documentation&amp;quot;
+	xmlns:spring=&amp;quot;http://www.springframework.org/schema/beans&amp;quot; 
+	xmlns:xsi=&amp;quot;http://www.w3.org/2001/XMLSchema-instance&amp;quot;
+	xsi:schemaLocation=&amp;quot;http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/ee/dw http://www.mulesoft.org/schema/mule/ee/dw/current/dw.xsd&amp;quot;&amp;gt;
+
+    &amp;lt;sub-flow name=&amp;quot;dataweave-testing-suiteSub_Flow&amp;quot;&amp;gt;
+        &amp;lt;dw:transform-message doc:name=&amp;quot;Transform Message&amp;quot;&amp;gt;
+        	&amp;lt;dw:set-payload resource=&amp;quot;classpath:dwl/employees.dwl&amp;quot;&amp;gt;&amp;lt;/dw:set-payload&amp;gt;
+        &amp;lt;/dw:transform-message&amp;gt;
+    &amp;lt;/sub-flow&amp;gt;
+    
+&amp;lt;/mule&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Here is our java test case equivalent to our earlier xml test -&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&quot;java&quot;&gt;package com.mms.mule.explore;
+
+import java.io.File;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.hamcrest.MatcherAssert;
+import org.hamcrest.Matchers;
+import org.junit.Test;
+import org.mule.DefaultMuleMessage;
+import org.mule.api.MuleEvent;
+import org.mule.munit.runner.functional.FunctionalMunitSuite;
+import org.mule.transformer.types.MimeTypes;
+import org.mule.util.FileUtils;
+
+public class DataWeaveTests extends FunctionalMunitSuite {
+
+	@Override
+	protected String getConfigResources() {
+		return &amp;quot;dataweave-testing-suite.xml&amp;quot;;
+	}
+	
+	@Test
+	public void testDW() throws Exception{
+		
+		String payload = FileUtils.readFileToString(new File(DataWeaveTests.class.getClassLoader().getResource(&amp;quot;sample_data/employees.xml&amp;quot;).getPath()));
+		
+		MuleEvent event = testEvent(payload);
+		//Setting MimeType is critical.
+   ((DefaultMuleMessage)event.getMessage()).setMimeType(MimeTypes.APPLICATION_XML);
+		
+      //Call our test flow
+		MuleEvent reply = runFlow(&amp;quot;dataweave-testing-suiteSub_Flow&amp;quot;, event);
+		
+		HashMap obj = reply.getMessage().getPayload(HashMap.class);
+		List&amp;lt;Map&amp;gt; lst = (List&amp;lt;Map&amp;gt;) obj.get(&amp;quot;employees&amp;quot;);
+      //Put some asserts
+		MatcherAssert.assertThat(2, Matchers.equalTo(lst.size()));
+		MatcherAssert.assertThat(36, Matchers.equalTo(lst.get(0).get(&amp;quot;age&amp;quot;)));
+		
+	}
+}
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h2&gt;Verifying CSV content output&lt;/h2&gt;
+&lt;p&gt;In previous example, dataweave output was Java map which is easy to verify. How about verifying CSV ouput? There are two two ways to verify CSV output -&lt;/p&gt;
+&lt;h4&gt;Verify as Strings:&lt;/h4&gt;
+&lt;ul&gt;
+  &lt;li&gt;After DataWeave, use &lt;code&gt;object-to-string&lt;/code&gt; transformer to convert output to string.&lt;/li&gt;
+  &lt;li&gt;Split the content with new line (you may want to replace &apos;\r\n&apos; with &apos;\n&apos; before splitting)&lt;/li&gt;
+  &lt;li&gt;Verify values in array.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h4&gt;Use another dataweave to convert csv to map and then verify the map data:&lt;/h4&gt;
+&lt;p&gt;Below munit flow adds another dataweave which outputs &lt;code&gt;application/java&lt;/code&gt; and script is as simple as &lt;code&gt;(payload)&lt;/code&gt; which converts the csv as is to java map. You can see in second debug screenshot below -&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&quot;xml&quot;&gt;&amp;lt;munit:test name=&amp;quot;dataweave-testing-test-suite-dataweave-csv-testingFlowTest&amp;quot;
+		description=&amp;quot;Test&amp;quot;&amp;gt;
+		&amp;lt;munit:set
+			payload=&amp;quot;#[getResource(&amp;#39;sample_data/employees.xml&amp;#39;).asStream()]&amp;quot;
+			doc:name=&amp;quot;Set Message&amp;quot; mimeType=&amp;quot;application/xml&amp;quot; /&amp;gt;
+		&amp;lt;dw:transform-message doc:name=&amp;quot;Transform Message&amp;quot;&amp;gt;
+			&amp;lt;dw:set-payload resource=&amp;quot;classpath:dwl/employees2.dwl&amp;quot; /&amp;gt;
+		&amp;lt;/dw:transform-message&amp;gt;
+        &amp;lt;dw:transform-message doc:name=&amp;quot;Transform Message&amp;quot;&amp;gt;
+            &amp;lt;dw:set-payload&amp;gt;&amp;lt;![CDATA[%dw 1.0
+%output application/java
+---
+(payload)]]&amp;gt;&amp;lt;/dw:set-payload&amp;gt;
+        &amp;lt;/dw:transform-message&amp;gt;
+		&amp;lt;munit:assert-on-equals expectedValue=&amp;quot;#[2]&amp;quot;
+			actualValue=&amp;quot;#[payload.size()]&amp;quot; doc:name=&amp;quot;Assert Equals&amp;quot;
+			message=&amp;quot;Missing some employees&amp;quot; /&amp;gt;
+		&amp;lt;munit:assert-on-equals expectedValue=&amp;quot;#[&amp;#39;36&amp;#39;]&amp;quot;
+			actualValue=&amp;quot;#[payload[0].age]&amp;quot; doc:name=&amp;quot;Assert Equals&amp;quot; /&amp;gt;
+	&amp;lt;/munit:test&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;img src=&quot;http://image.prntscr.com/image/0ef71e30d1e840bda3069a2531d607ec.png&quot; alt=&quot;MUnit Testing for DataWeave CSV&quot; /&gt;&lt;/p&gt;
+&lt;p&gt;If you look at the second assert that verifies age and compare with that of earlier java testing, you will notice that expected value is defined as string literal &lt;code&gt;#[&amp;#39;36&amp;#39;]&lt;/code&gt; vs. number &lt;code&gt;#[36]&lt;/code&gt;. &lt;strong&gt;This is because, all values from CSV are transformed as String data type in MAP&lt;/strong&gt; and &lt;code&gt;#[36]&lt;/code&gt; would cause test case to fail. To have strongly typed values, we can write a full mapping in second dataweave but I am skipping that step for now.&lt;/p&gt;
+&lt;p&gt;With this minimal setup, you can verify the data in your munit.&lt;/p&gt;
+&lt;h2&gt;Troubleshooting&lt;/h2&gt;
+&lt;h3&gt;org.threeten.bp.zone.TzdbZoneRulesProvider could not be instantiated while running Java Test case&lt;/h3&gt;
+&lt;p&gt;If you are manipulating dates in your dataweave script and writing test cases in java, then you may see tests failing with below error -&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&quot;java&quot;&gt;org.mule.api.MessagingException: org.threeten.bp.zone.ZoneRulesProvider: Provider org.threeten.bp.zone.TzdbZoneRulesProvider could not be instantiated (java.util.ServiceConfigurationError).
+	at org.mule.execution.ExceptionToMessagingExceptionExecutionInterceptor.execute(ExceptionToMessagingExceptionExecutionInterceptor.java:42)
+	at org.mule.execution.MessageProcessorNotificationExecutionInterceptor.execute(MessageProcessorNotificationExecutionInterceptor.java:108)
+  ...
+Caused by: java.util.ServiceConfigurationError: org.threeten.bp.zone.ZoneRulesProvider: Provider org.threeten.bp.zone.TzdbZoneRulesProvider could not be instantiated
+	at java.util.ServiceLoader.fail(ServiceLoader.java:232)
+	at java.util.ServiceLoader.access$100(ServiceLoader.java:185)
+  ...
+Caused by: org.threeten.bp.zone.ZoneRulesException: Unable to load TZDB time-zone rules: jar:file:/Users/manik/.m2/repository/org/threeten/threetenbp/1.2/threetenbp-1.2.jar!/org/threeten/bp/TZDB.dat
+	at org.threeten.bp.zone.TzdbZoneRulesProvider.load(TzdbZoneRulesProvider.java:146)
+	at org.threeten.bp.zone.TzdbZoneRulesProvider.&amp;lt;init&amp;gt;(TzdbZoneRulesProvider.java:87)
+  ...
+Caused by: org.threeten.bp.zone.ZoneRulesException: Data already loaded for TZDB time-zone rules version: 2014i
+	at org.threeten.bp.zone.TzdbZoneRulesProvider.load(TzdbZoneRulesProvider.java:139)
+	... 87 more
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;&lt;strong&gt;Resolution:&lt;/strong&gt; This error is thrown when threetenbp library gets loaded twice. &lt;code&gt;TzdbZoneRulesProvider&lt;/code&gt; is already available in java runtime and dataweave pulls this jar as its dependency. Simple resolution is to exclude this from maven dependency, modify dataweave plugin dependency in your pom -&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&quot;xml&quot;&gt;		&amp;lt;dependency&amp;gt;
+			&amp;lt;groupId&amp;gt;com.mulesoft.weave&amp;lt;/groupId&amp;gt;
+			&amp;lt;artifactId&amp;gt;mule-plugin-weave_2.11&amp;lt;/artifactId&amp;gt;
+			&amp;lt;version&amp;gt;${mule.version}&amp;lt;/version&amp;gt;
+			&amp;lt;scope&amp;gt;provided&amp;lt;/scope&amp;gt;
+			&amp;lt;exclusions&amp;gt;
+				&amp;lt;exclusion&amp;gt;
+					&amp;lt;groupId&amp;gt;org.threeten&amp;lt;/groupId&amp;gt;
+					&amp;lt;artifactId&amp;gt;threetenbp&amp;lt;/artifactId&amp;gt;
+				&amp;lt;/exclusion&amp;gt;
+			&amp;lt;/exclusions&amp;gt;
+		&amp;lt;/dependency&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h3&gt;ArrayIndexOutOfBound Exception when setting CSV payload&lt;/h3&gt;
+&lt;p&gt;If you are testing CSV input payload with dataweave on windows, then you may get &lt;code&gt;ArrayIndexOutOfBound&lt;/code&gt; exception. I think this is a bug due windows formatted EOL (\r\n) characters.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Resolution:&lt;/strong&gt; You can use tools like notepad++ or dos2unix to convert your file to UNIX (\n) EOL format. I usually like to do it like below which makes test compatible with both formats -&lt;/p&gt;
+&lt;pre&gt;&lt;code class=&quot;java&quot;&gt;String payload = FileUtils.readFileToString(new File(DataWeaveTests.class.getClassLoader().getResource(&amp;quot;sample_data/employees.csv&amp;quot;).getPath()));
+payload = payload.replace(&amp;quot;\r\n&amp;quot;, &amp;quot;\n&amp;quot;);
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h2&gt;Source Code&lt;/h2&gt;
+&lt;p&gt;Test Application source code is available on Github &lt;a href=&quot;https://github.com/UnitTesters/explore-mule&quot;&gt;here&lt;/a&gt;&lt;/p&gt;
+&lt;h2&gt;Conclusion&lt;/h2&gt;
+&lt;p&gt;Unit Testing is crucial part of any software development. Mule ESB provides numerous components for system integrations and data transformation. In this post, we saw how we can write unit test cases for DataWeave (Transform Message) component and ensure the transformed data is as per expecations. I hope this will help you to write (almost) bug-free scripts :).&lt;/p&gt;
+&lt;p&gt;Feel free to comment and let me know your thoughts or questions. &lt;/p&gt;
+	  </description>
+    </item>
+    
+    <item>
+      <title>Mule MUnit testing with variables and properties</title>
+      <link>https://unittesters.com/blog/mule-munit-testing-variables-properties/</link>
+      <pubDate>Mon, 30 May 2016 00:00:00 -0400</pubDate>
+      <guid isPermaLink="false">blog/mule-munit-testing-variables-properties/</guid>
+      <description>
+      &lt;p&gt;Flow Variables, Session Variables, Inbound/Outbound properties are very common in mule flows. Mule MUnit framework makes it very easy to unit test any Mule Flow and subflows. In this post, we will see how we can unit test our flows involving variables and properties.&lt;/p&gt;
+&lt;p&gt;Let’s consider a simple mule flow that reads a file and then sets a flow variable and session variable.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&quot;/blog/blog-files/Mule_Munit_Flow_1.png&quot; alt=&quot;Mule Munit Flow&quot; /&gt;&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;&amp;lt;flow name=&amp;quot;SampleMuleFlow&amp;quot;&amp;gt;
+        &amp;lt;file:inbound-endpoint path=&amp;quot;input&amp;quot; responseTimeout=&amp;quot;10000&amp;quot; doc:name=&amp;quot;File&amp;quot;/&amp;gt;
+        &amp;lt;set-variable variableName=&amp;quot;fileName&amp;quot; value=&amp;quot;#[message.inboundProperties.originalFilename]&amp;quot; doc:name=&amp;quot;Variable&amp;quot;/&amp;gt;
+        &amp;lt;set-session-variable variableName=&amp;quot;sessFileName&amp;quot; value=&amp;quot;#[flowVars.fileName]&amp;quot; doc:name=&amp;quot;Session Variable&amp;quot;/&amp;amp;gt
+        &amp;lt;logger message=&amp;quot;#[payload]&amp;quot; level=&amp;quot;INFO&amp;quot; doc:name=&amp;quot;Logger&amp;quot;/&amp;gt;
+    &amp;lt;/flow&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;h2&gt;Creating XML MUnit Test Case&lt;/h2&gt;
+&lt;p&gt;If you are using Anypoint Studio, then you can right click our flow, choose MUnit –&amp;gt; Create New Suite. Studio will automatically create an MUnit Test suite under /src/test/munit and adds a test case to it. It should look like –&lt;/p&gt;
+&lt;p&gt;&lt;img src=&quot;/blog/blog-files/testmule-munit-xml-testcase.png&quot; alt=&quot;testmule-munit-xml-testcase&quot; /&gt;&lt;/p&gt;
+&lt;h3&gt;What we will do here –&lt;/h3&gt;
+&lt;ol&gt;
+  &lt;li&gt;MUnit mocks all inbound connectors and endpoints, so we will need to manually set the test message for the flow. We will do that by adding &lt;code&gt;&amp;lt;munit:set&amp;gt;&lt;/code&gt; component. We will also set an inbound property originalFilename and invocation/flow variable on the message.&lt;/li&gt;
+  &lt;li&gt;Call our main flow with using flow-ref&lt;/li&gt;
+  &lt;li&gt;After main flow is executed, we will verify that flow variable value is same as what we set on message.&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;Our final XML Unit Test –&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;&amp;lt;munit:test name=&amp;quot;testmule-test-suite-SampleMuleFlowTest&amp;quot; description=&amp;quot;Test&amp;quot;&amp;gt;
+    	&amp;lt;munit:set payload=&amp;quot;#[getResources(&amp;#39;test.txt&amp;#39;).asStream()]&amp;quot; doc:name=&amp;quot;Set Message&amp;quot;&amp;gt;
+            &amp;lt;munit:invocation-properties&amp;gt;
+                &amp;lt;munit:invocation-property key=&amp;quot;fileName2&amp;quot; value=&amp;quot;test2.txt&amp;quot;/&amp;gt;
+            &amp;lt;/munit:invocation-properties&amp;gt;
+            &amp;lt;munit:inbound-properties&amp;gt;
+                &amp;lt;munit:inbound-property key=&amp;quot;originalFilename&amp;quot; value=&amp;quot;test.txt&amp;quot;/&amp;gt;
+            &amp;lt;/munit:inbound-properties&amp;gt;
+    	&amp;lt;/munit:set&amp;gt;
+        &amp;lt;flow-ref name=&amp;quot;SampleMuleFlow&amp;quot; doc:name=&amp;quot;Flow-ref to SampleMuleFlow&amp;quot;/&amp;gt;
+        &amp;lt;munit:assert-on-equals expectedValue=&amp;quot;#[flowVars.fileName2]&amp;quot; actualValue=&amp;quot;#[&amp;#39;test2.txt&amp;#39;]&amp;quot; doc:name=&amp;quot;Assert Equals&amp;quot;/&amp;gt;
+    &amp;lt;/munit:test&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;We can then run this as a MUnit Test in studio.&lt;/p&gt;
+&lt;h2&gt;Creating Java MUnit Test Case&lt;/h2&gt;
+&lt;p&gt;For those who prefer writing Java instead of XML, MUnit framework provides fluent java api’s to be used with JUnit. You can create java class by extending &lt;code&gt;FunctionalMunitSuite&lt;/code&gt; class.&lt;/p&gt;
+&lt;p&gt;Below is our java test case –&lt;/p&gt;
+&lt;pre&gt;&lt;code&gt;package testmule;
+
+import java.io.InputStream;
+
+import org.junit.Assert;
+import org.junit.Test;
+import org.mule.api.MuleEvent;
+import org.mule.api.MuleMessage;
+import org.mule.api.transport.PropertyScope;
+import org.mule.munit.runner.functional.FunctionalMunitSuite;
+
+public class SampleTestCase extends FunctionalMunitSuite {
+
+	@Override
+	protected String getConfigResources() {
+		return &amp;quot;testmule2.xml&amp;quot;;
+	}
+	
+	@Test
+	public void testSampleFlow(){
+		InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream(&amp;quot;test.txt&amp;quot;);
+		MuleMessage msg = muleMessageWithPayload(is);
+		try {
+			msg.setProperty(&amp;quot;originalFileName&amp;quot;, &amp;quot;test.txt&amp;quot;, PropertyScope.INBOUND);
+			MuleEvent test = testEvent(msg);
+			
+			test.setFlowVariable(&amp;quot;fileName2&amp;quot;, &amp;quot;test2.txt&amp;quot;);
+			
+			MuleEvent reply = runFlow(&amp;quot;SampleMuleFlow&amp;quot;, test);
+			
+			Assert.assertEquals(&amp;quot;Verify Flow Variable&amp;quot;, &amp;quot;test2.txt&amp;quot;, reply.getFlowVariable(&amp;quot;fileName2&amp;quot;));
+			
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+				
+	}
+}
+
+&lt;/code&gt;&lt;/pre&gt;
+&lt;p&gt;Points to note –&lt;/p&gt;
+&lt;ol&gt;
+  &lt;li&gt;Create a MuleMessage using muleMessageWithPayload function provided by FunctionalMunitSuite super class.&lt;/li&gt;
+  &lt;li&gt;Creating a MuleEvent using testEvent function provided by FunctionalMunitSuite super class.&lt;/li&gt;
+  &lt;li&gt;Inbound and Outbound properties can be set on the Message we created. For flow variables and session variables, we will use the test MuleEvent. testEvent(msg) method do not copy flow variables and session variables into test event so setting anything on msg will get lost while creating test event.&lt;/li&gt;
+  &lt;li&gt;Finally, we call our main flow and verify the value of our flow variable in returned message&lt;br/&gt;So keep testing your code!&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;&lt;strong&gt;More Reading –&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;&lt;a href=&quot;https://docs.mulesoft.com/munit/v/1.1.1/&quot;&gt;MUnit Documentation&lt;/a&gt;&lt;/p&gt;
+	  </description>
+    </item>
+    
+    <item>
+      <title>What is Unit Testing?</title>
+      <link>https://unittesters.com/blog/what-is-unit-testing/</link>
+      <pubDate>Sat, 21 May 2016 00:00:00 -0400</pubDate>
+      <guid isPermaLink="false">blog/what-is-unit-testing/</guid>
+      <description>
+      &lt;p&gt;&lt;em&gt;Unit Testing&lt;/em&gt; is a development process in which smallest unit of an application code is tested to ensure expected working. &lt;a href=&quot;https://twitter.com/KentBeck&quot;&gt;Kent Beck&lt;/a&gt; developed Extreme Programming (XP), a software development methodology and unit testing evolved as a part of that methodology. In programming context, an unit could be a class, method, function or other smallest segment of code that can be tested and verified in isolation.&lt;/p&gt;
+	  </description>
+    </item>
+    
+
+  </channel> 
+</rss>

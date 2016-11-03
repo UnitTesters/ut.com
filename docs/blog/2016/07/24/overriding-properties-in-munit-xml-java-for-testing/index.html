@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+  <meta charset="utf-8"/>
+  <title>Overriding Properties in MUnit XML and Java for testing</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="null">
+  <meta name="author" content="null">
+  <meta name="keywords" content="[Mule-ESB, Properties-placeholder, FunctionalMunitSuite]">
+  <meta name="generator" content="JBake">
+
+  <link href="https://fonts.googleapis.com/css?family=Rokkitt" rel="stylesheet">
+  <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet">
+  <!-- Le styles -->
+  <link href="../../../../../resources/css/bootstrap.min.css" rel="stylesheet">
+  <link href="../../../../../resources/css/asciidoctor.css" rel="stylesheet">
+  <link href="../../../../../resources/css/base.css" rel="stylesheet">
+  <link href="../../../../../resources/css/prettify.css" rel="stylesheet">
+
+	<script src="../../../../../resources/js/jquery-1.11.1.min.js"></script>
+    <script src="../../../../../resources/js/bootstrap.min.js"></script>
+    <script src="../../../../../resources/js/prettify.js"></script>
+	
+
+  <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
+  <!--[if lt IE 9]>
+    <script src="../../../../../resources/js/html5shiv.min.js"></script>
+  <![endif]-->
+
+  <!-- Fav and touch icons -->
+  <link rel="apple-touch-icon" sizes="57x57" href="../../../../../resources/ico/apple-icon-57x57.png">
+<link rel="apple-touch-icon" sizes="60x60" href="../../../../../resources/ico/apple-icon-60x60.png">
+<link rel="apple-touch-icon" sizes="72x72" href="../../../../../resources/ico/apple-icon-72x72.png">
+<link rel="apple-touch-icon" sizes="76x76" href="../../../../../resources/ico/apple-icon-76x76.png">
+<link rel="apple-touch-icon" sizes="114x114" href="../../../../../resources/ico/apple-icon-114x114.png">
+<link rel="apple-touch-icon" sizes="120x120" href="../../../../../resources/ico/apple-icon-120x120.png">
+<link rel="apple-touch-icon" sizes="144x144" href="../../../../../resources/ico/apple-icon-144x144.png">
+<link rel="apple-touch-icon" sizes="152x152" href="../../../../../resources/ico/apple-icon-152x152.png">
+<link rel="apple-touch-icon" sizes="180x180" href="../../../../../resources/ico/apple-icon-180x180.png">
+<link rel="icon" type="image/png" sizes="192x192"  href="../../../../../resources/ico/android-icon-192x192.png">
+<link rel="icon" type="image/png" sizes="32x32" href="../../../../../resources/ico/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="96x96" href="../../../../../resources/ico/favicon-96x96.png">
+<link rel="icon" type="image/png" sizes="16x16" href="../../../../../resources/ico/favicon-16x16.png">
+<link rel="manifest" href="../../../../../resources/ico/manifest.json">
+<meta name="msapplication-TileColor" content="#ffffff">
+<meta name="msapplication-TileImage" content="../../../../../resources/ico/ms-icon-144x144.png">
+<meta name="theme-color" content="#ffffff">
+  <link rel="shortcut icon" href="../../../../../resources/ico/favicon.ico">
+  
+<!-- Begin Cookie Consent plugin by Silktide - http://silktide.com/cookieconsent -->
+<script type="text/javascript">
+    window.cookieconsent_options = {"message":"This website uses cookies to ensure you get the best experience on our website. If you continue to use this site, you agree to our use of cookies.","dismiss":"Got it!","learnMore":"More info","link":"/terms-usage-privacy/","theme":"dark-floating"};
+</script>
+
+<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/cookieconsent2/1.0.10/cookieconsent.min.js"></script>
+<!-- End Cookie Consent plugin -->
+
+  
+</head>
+
+  <body onload="prettyPrint()">
+    <div id="wrap">
+		  <div class="container">
+		
+<header>
+          <!-- Navigation -->
+    <nav class="navbar navbar-inverse navbar-custom navbar-fixed-top">
+        <div class="container">
+            <!-- Brand and toggle get grouped for better mobile display -->
+            <div class="navbar-header page-scroll">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                
+                <a class="navbar-brand plain" href="/" class="plain">
+                	<img src="../../../../../resources/ico/icon.png" alt="" class="site-logo img-responsive"/>Unit Testers
+                </a>
+            </div>
+
+            <!-- Collect the nav links, forms, and other content for toggling -->
+            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                <ul class="nav navbar-nav navbar-right">
+                	<li>
+                        <a class="plain" href="/">Home</a>
+                    </li>
+                    <li class="dropdown">
+			          <a href="#" class="dropdown-toggle plain" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Categories <span class="caret"></span></a>
+			          <ul class="dropdown-menu">
+			            
+								<li><a class="plain" href="/categories/Unit-Testing"/>Unit Testing</a></li>
+							
+								<li><a class="plain" href="/categories/MUnit"/>MUnit</a></li>
+							
+			          </ul>
+			        </li>
+			        <li>
+                        <a class="plain" href="/archive.html">All Posts</a>
+                    </li>
+                    
+                    <li>
+                        <a class="plain" href="http://eepurl.com/b-IJAD" target="_blank">Subscribe</a>
+                    </li>
+                </ul>
+            </div>
+            <!-- /.navbar-collapse -->
+        </div>
+        <!-- /.container -->
+    </nav>
+
+
+</header>
+
+
+	
+	<div class="post">
+		<h1 class="post-title">Overriding Properties in MUnit XML and Java for testing</h1>
+		<p class="post-meta">Published by Manik Magar on 24 July 2016 under <a href="/categories/MUnit">MUnit</a>
+		</p>
+		
+		<div class="post-summary">
+			<p></p>
+		</div>
+		<div>
+			<p class="post-content"> <p>It is very common for any mule application to use external properties files. <strong>In this post, we will see how we can override properties values for testing.</strong> We will also cover how we can write to temporary folder during munit test, disable connector mocking and asserting file existence.</p>
+<p>For demonstration purpose, we will have a flow that uses DataWeave to convert xml file into csv and writes to an output folder using <code>file:outbound-endpoint</code>. Let's read the output path from properties file with key <code>explore.mule.target.folder</code>. As we are going to write file during testing, we will need munit not to mock the connectors.</p>
+<p>Here is our production code that declares a <code>context:property-placeholder</code> to read properties from <code>src/main/resources/explore-mule.properties</code></p>
+<pre><code class="xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+
+&lt;mule xmlns:context=&quot;http://www.springframework.org/schema/context&quot;
+	xmlns:dw=&quot;http://www.mulesoft.org/schema/mule/ee/dw&quot;
+	xmlns:file=&quot;http://www.mulesoft.org/schema/mule/file&quot;
+	xmlns=&quot;http://www.mulesoft.org/schema/mule/core&quot; xmlns:doc=&quot;http://www.mulesoft.org/schema/mule/documentation&quot;
+	xmlns:spring=&quot;http://www.springframework.org/schema/beans&quot; version=&quot;EE-3.8.0&quot;
+	xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;
+	xsi:schemaLocation=&quot;
+http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-current.xsd 
+http://www.mulesoft.org/schema/mule/ee/dw http://www.mulesoft.org/schema/mule/ee/dw/current/dw.xsd 
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd&quot;&gt;
+
+    &lt;context:property-placeholder location=&quot;explore-mule.properties&quot;/&gt;
+ 
+
+    &lt;flow name=&quot;properties-testingFlow3&quot;&gt;
+        &lt;file:inbound-endpoint path=&quot;input3&quot; moveToDirectory=&quot;output&quot; responseTimeout=&quot;10000&quot; doc:name=&quot;File&quot;/&gt;
+        &lt;dw:transform-message doc:name=&quot;Transform Message&quot;&gt;
+            &lt;dw:input-payload doc:sample=&quot;sample_data/empty.xml&quot;/&gt;
+            &lt;dw:set-payload resource=&quot;classpath:dwl/employees2.dwl&quot;/&gt;
+        &lt;/dw:transform-message&gt;
+        &lt;file:outbound-endpoint path=&quot;${explore.mule.target.folder}&quot; outputPattern=&quot;output.csv&quot; doc:name=&quot;File&quot;/&gt;
+    &lt;/flow&gt;
+
+&lt;/mule&gt;
+
+</code></pre>
+<h2>Overriding Properties in XML</h2>
+<p>Similar to specifying properties in production code, we can create a copy of properties files under <code>/src/test/resource/env/test/explore-mule.properties</code> and refer to it inside xml using <code>context:property-placeholder</code>.</p>
+<p>Below XML MUnit suite shows this option in action. In test explore-mule.properties, we set <code>explore.mule.target.folder=test-output</code> and then verify that output.csv exists after test case executes. </p>
+<pre><code class="xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+
+&lt;mule xmlns:context=&quot;http://www.springframework.org/schema/context&quot;
+	xmlns=&quot;http://www.mulesoft.org/schema/mule/core&quot; xmlns:doc=&quot;http://www.mulesoft.org/schema/mule/documentation&quot; xmlns:munit=&quot;http://www.mulesoft.org/schema/mule/munit&quot; xmlns:spring=&quot;http://www.springframework.org/schema/beans&quot; xmlns:core=&quot;http://www.mulesoft.org/schema/mule/core&quot; xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot; xsi:schemaLocation=&quot;http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-current.xsd
+http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd&quot;&gt;
+
+ &lt;context:property-placeholder location=&quot;env/test/explore-mule.properties&quot;/&gt;
+ 
+    &lt;munit:config name=&quot;munit&quot; doc:name=&quot;MUnit configuration&quot; mock-connectors=&quot;false&quot;/&gt;
+    &lt;spring:beans&gt;
+        &lt;spring:import resource=&quot;classpath:sample-flows.xml&quot;/&gt;
+    &lt;/spring:beans&gt;
+    &lt;munit:test name=&quot;sample-flows-test-suite-properties-testingFlow3Test&quot; description=&quot;Test&quot;&gt;
+    	&lt;munit:set
+			payload=&quot;#[getResource(&#39;sample_data/employees.xml&#39;).asStream()]&quot;
+			doc:name=&quot;Set Message&quot; mimeType=&quot;application/xml&quot; /&gt;
+        &lt;flow-ref name=&quot;properties-testingFlow3&quot; doc:name=&quot;Flow-ref to properties-testingFlow3&quot;/&gt;
+        &lt;munit:assert-true condition=&quot;#[new java.io.File(&#39;./test-output/output.csv&#39;).exists()]&quot; doc:name=&quot;Assert True&quot;/&gt;
+        
+    &lt;/munit:test&gt;
+&lt;/mule&gt;
+
+</code></pre>
+<p>Don't forget to disable connector mocking by adding <code>mock-connectors=&quot;false&quot;</code> in <code>munit:config</code>.</p>
+<h2>Overriding Properties in FunctionalMunitSuite</h2>
+<p>When you write a munit test case in java using FunctionalMunitSuite, it is more flexible to set properties. When <code>FunctionalMunitSuite</code> creates the mocking configuration during init, it calls a protected method <code>protected Properties getStartUpProperties()</code> to get the properties for tests. Default implementation in FunctionalMUnitSuite returns null but we can easily override this function in our test suite to return an instance of <code>java.util.Properties</code>.</p>
+<p>One benefit of this over xml approach is, you get to use power of java while setting properties values. In this example, we will use <code>org.junit.rules.TemporaryFolder</code> to create a temporary folder and set that as a target folder. If we really use this as a junit <code>Rule</code> then JUnit can take care of deleting temporary folder, but here we can use that as rule because <code>getStartUpProperties</code> is called once a testSuite/context initialization so we will keep reference to our properties and folders. So we will also add an <code>AfterClass</code> method to delete this folder.</p>
+<p>Below Java code shows this in action. At the end of our test case, we assert that the target temporary folder contains output.csv. </p>
+<pre><code class="java">package com.mms.mule.explore;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.Properties;
+
+import org.hamcrest.MatcherAssert;
+import org.hamcrest.Matchers;
+import org.junit.AfterClass;
+import org.junit.Test;
+import org.junit.rules.TemporaryFolder;
+import org.mule.DefaultMuleMessage;
+import org.mule.api.MuleEvent;
+import org.mule.munit.runner.functional.FunctionalMunitSuite;
+import org.mule.transformer.types.MimeTypes;
+import org.mule.util.FileUtils;
+
+public class PropertiesTestSuite extends FunctionalMunitSuite {
+
+	private Properties props;
+	private static TemporaryFolder tempFolder;
+	
+	@Override
+	protected String getConfigResources() {
+		return &quot;sample-flows.xml&quot;;
+	}
+	
+	@Override
+	protected boolean haveToMockMuleConnectors() {
+		return false;
+	}
+	
+	@AfterClass
+	public static void cleanup(){
+		tempFolder.delete();
+	}
+	
+	@Override
+	protected Properties getStartUpProperties() {
+		props = super.getStartUpProperties();
+		if(props == null){
+			props = new Properties();
+		}
+		tempFolder = new TemporaryFolder();
+		try {
+			tempFolder.create();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		String path =tempFolder.getRoot().getAbsolutePath();
+		System.out.println(&quot;Setting path to - &quot;+ path);
+		props.setProperty(&quot;explore.mule.target.folder&quot;, path);
+		
+		return props;
+	}
+	
+	@Test
+	public void testFileWriting() throws Exception{
+		String payload = FileUtils.readFileToString(new File(DataWeaveTests.class.getClassLoader().getResource(&quot;sample_data/employees.xml&quot;).getPath()));
+		
+		MuleEvent event = testEvent(payload);
+		((DefaultMuleMessage)event.getMessage()).setMimeType(MimeTypes.APPLICATION_XML);
+		
+		MuleEvent reply = runFlow(&quot;properties-testingFlow3&quot;, event);
+		
+		MatcherAssert.assertThat(new File(tempFolder.getRoot(), &quot;output.csv&quot;).exists(),Matchers.equalTo(Boolean.TRUE));
+	}
+}
+
+</code></pre>
+<p>Don't forget to override <code>haveToMockMuleConnectors()</code> and return false to allow file writing.</p>
+<p>As an alternative to overriding <code>getStartUpProperties</code> method, you can also create a sample munit xml config with context:properties-placeholder and then use that inside <code>getConfigResources()</code> method.</p>
+<h2>Test Application Source</h2>
+<p>Test Application source code is available on Github <a href="https://github.com/UnitTesters/explore-mule">here</a>.</p>
+<h2>Conclusion</h2>
+<p>MUnit provides a very stable environment for testing mule flows. You can easily override your production properties inside MUnit XML as well as Java test suite.</p> </p>
+		</div>
+		<p class="post-tags"> Tags:  <a href="/tags/Mule-ESB.html">Mule-ESB</a> <a href="/tags/Properties-placeholder.html">Properties-placeholder</a> <a href="/tags/FunctionalMunitSuite.html">FunctionalMunitSuite</a>  </p>
+		<div class="social">
+<div class="container">
+    <div class="btn-group">
+        <button class="btn btn-default disabled">Share:</button> 
+        <a class="btn btn-default" target="_blank" title="Like On Facebook" href="http://www.facebook.com/plugins/like.php?href=https://unittesters.com/blog/2016/07/24/overriding-properties-in-munit-xml-java-for-testing/">
+            <i class="fa fa-thumbs-o-up fa-lg fb"></i>
+        </a>
+        <a class="btn btn-default" target="_blank" title="On Facebook" href="http://www.facebook.com/sharer.php?u=https://unittesters.com/blog/2016/07/24/overriding-properties-in-munit-xml-java-for-testing/&amp;t=Overriding Properties in MUnit XML and Java for testing">
+            <i class="fa fa-facebook fa-lg fb"></i>
+        </a>
+        <a class="btn btn-default" target="_blank" title="On Twitter" href="http://twitter.com/share?url=https://unittesters.com/blog/2016/07/24/overriding-properties-in-munit-xml-java-for-testing/&amp;text=Overriding Properties in MUnit XML and Java for testing">
+            <i class="fa fa-twitter fa-lg tw"></i>
+        </a>
+        <a class="btn btn-default" target="_blank" title="On Google Plus" href="https://plusone.google.com/_/+1/confirm?hl=en&amp;url=https://unittesters.com/blog/2016/07/24/overriding-properties-in-munit-xml-java-for-testing/">
+            <i class="fa fa-google-plus fa-lg google"></i>
+        </a>
+        <a class="btn btn-default" target="_blank" title="On LinkedIn" href="http://www.linkedin.com/shareArticle?mini=true&amp;url=https://unittesters.com/blog/2016/07/24/overriding-properties-in-munit-xml-java-for-testing/">
+            <i class="fa fa-linkedin fa-lg linkin"></i>
+        </a>
+        <a class="btn btn-default" target="_blank" title="Pin It" href="http://www.pinterest.com/pin/create/button/?url=https://unittesters.com/blog/2016/07/24/overriding-properties-in-munit-xml-java-for-testing/&amp;media=null&amp;description=Overriding Properties in MUnit XML and Java for testing">
+            <i class="fa fa-pinterest fa-lg pinterest"></i>
+        </a>
+    </div>
+</div>
+</div>
+		
+	</div>
+	
+	
+<section class="disqus">
+  <div id="disqus_thread"></div>
+  <script type="text/javascript">
+    var disqus_shortname = 'unittesters';
+
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+  </script>
+  <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+  <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+</section>
+
+
+	
+		<div id="tagsCloud">
+			<hr/>
+			<h4>Tags Cloud</h4>
+			
+				<a class="plain" href="/tags/flow-variables.html"/>flow-variables</a> | 
+			
+				<a class="plain" href="/tags/munit.html"/>munit</a> | 
+			
+				<a class="plain" href="/tags/Transform-Message.html"/>Transform-Message</a> | 
+			
+				<a class="plain" href="/tags/DataWeave.html"/>DataWeave</a> | 
+			
+				<a class="plain" href="/tags/FunctionalMunitSuite.html"/>FunctionalMunitSuite</a> | 
+			
+				<a class="plain" href="/tags/Mule-ESB.html"/>Mule-ESB</a> | 
+			
+				<a class="plain" href="/tags/Properties-placeholder.html"/>Properties-placeholder</a> | 
+			
+				<a class="plain" href="/tags/Testing.html"/>Testing</a> | 
+			
+		
+		<div>
+		<div id="push"></div>
+
+			
+		<div id="mailChimp">
+				
+		
+		</div>
+		
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-78784632-1', 'auto');
+  ga('send', 'pageview', {
+    'page': 'blog/2016/07/24/overriding-properties-in-munit-xml-java-for-testing/ ',
+    'title': 'Overriding Properties in MUnit XML and Java for testing '
+      });
+
+</script>
+
+
+
+		<footer>
+					<hr/>
+			<p class="muted credit">UnitTesters.com &copy; 2016 | Baked with <a href="https://github.com/myjavaacademy/jbake">JBake</a> | <a href="/sitemap.xml">Sitemap </a> | <a href="/terms-usage-privacy/">Terms of Use and Privacy Policy</a> | <a class="plain" href="/feed.xml"><i class="fa fa-rss-square" aria-hidden="true"></i> RSS Feed</a></p>
+	       
+		</footer>
+
+  
+  </body>
+</html>
+

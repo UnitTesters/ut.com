@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+  <meta charset="utf-8"/>
+  <title>Unit Testing Mule DataWeave Scripts with MUnit</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Mule DataWeave script can do complex transformations and so must be unit tested to ensure expected results. This post will help you to get started with dataweave unit testing. ">
+  <meta name="author" content="null">
+  <meta name="keywords" content="[DataWeave, Transform-Message, Mule-ESB]">
+  <meta name="generator" content="JBake">
+
+  <link href="https://fonts.googleapis.com/css?family=Rokkitt" rel="stylesheet">
+  <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css" rel="stylesheet">
+  <!-- Le styles -->
+  <link href="../../../../../resources/css/bootstrap.min.css" rel="stylesheet">
+  <link href="../../../../../resources/css/asciidoctor.css" rel="stylesheet">
+  <link href="../../../../../resources/css/base.css" rel="stylesheet">
+  <link href="../../../../../resources/css/prettify.css" rel="stylesheet">
+
+	<script src="../../../../../resources/js/jquery-1.11.1.min.js"></script>
+    <script src="../../../../../resources/js/bootstrap.min.js"></script>
+    <script src="../../../../../resources/js/prettify.js"></script>
+	
+
+  <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
+  <!--[if lt IE 9]>
+    <script src="../../../../../resources/js/html5shiv.min.js"></script>
+  <![endif]-->
+
+  <!-- Fav and touch icons -->
+  <link rel="apple-touch-icon" sizes="57x57" href="../../../../../resources/ico/apple-icon-57x57.png">
+<link rel="apple-touch-icon" sizes="60x60" href="../../../../../resources/ico/apple-icon-60x60.png">
+<link rel="apple-touch-icon" sizes="72x72" href="../../../../../resources/ico/apple-icon-72x72.png">
+<link rel="apple-touch-icon" sizes="76x76" href="../../../../../resources/ico/apple-icon-76x76.png">
+<link rel="apple-touch-icon" sizes="114x114" href="../../../../../resources/ico/apple-icon-114x114.png">
+<link rel="apple-touch-icon" sizes="120x120" href="../../../../../resources/ico/apple-icon-120x120.png">
+<link rel="apple-touch-icon" sizes="144x144" href="../../../../../resources/ico/apple-icon-144x144.png">
+<link rel="apple-touch-icon" sizes="152x152" href="../../../../../resources/ico/apple-icon-152x152.png">
+<link rel="apple-touch-icon" sizes="180x180" href="../../../../../resources/ico/apple-icon-180x180.png">
+<link rel="icon" type="image/png" sizes="192x192"  href="../../../../../resources/ico/android-icon-192x192.png">
+<link rel="icon" type="image/png" sizes="32x32" href="../../../../../resources/ico/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="96x96" href="../../../../../resources/ico/favicon-96x96.png">
+<link rel="icon" type="image/png" sizes="16x16" href="../../../../../resources/ico/favicon-16x16.png">
+<link rel="manifest" href="../../../../../resources/ico/manifest.json">
+<meta name="msapplication-TileColor" content="#ffffff">
+<meta name="msapplication-TileImage" content="../../../../../resources/ico/ms-icon-144x144.png">
+<meta name="theme-color" content="#ffffff">
+  <link rel="shortcut icon" href="../../../../../resources/ico/favicon.ico">
+  
+<!-- Begin Cookie Consent plugin by Silktide - http://silktide.com/cookieconsent -->
+<script type="text/javascript">
+    window.cookieconsent_options = {"message":"This website uses cookies to ensure you get the best experience on our website. If you continue to use this site, you agree to our use of cookies.","dismiss":"Got it!","learnMore":"More info","link":"/terms-usage-privacy/","theme":"dark-floating"};
+</script>
+
+<script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/cookieconsent2/1.0.10/cookieconsent.min.js"></script>
+<!-- End Cookie Consent plugin -->
+
+  
+</head>
+
+  <body onload="prettyPrint()">
+    <div id="wrap">
+		  <div class="container">
+		
+<header>
+          <!-- Navigation -->
+    <nav class="navbar navbar-inverse navbar-custom navbar-fixed-top">
+        <div class="container">
+            <!-- Brand and toggle get grouped for better mobile display -->
+            <div class="navbar-header page-scroll">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                
+                <a class="navbar-brand plain" href="/" class="plain">
+                	<img src="../../../../../resources/ico/icon.png" alt="" class="site-logo img-responsive"/>Unit Testers
+                </a>
+            </div>
+
+            <!-- Collect the nav links, forms, and other content for toggling -->
+            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                <ul class="nav navbar-nav navbar-right">
+                	<li>
+                        <a class="plain" href="/">Home</a>
+                    </li>
+                    <li class="dropdown">
+			          <a href="#" class="dropdown-toggle plain" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Categories <span class="caret"></span></a>
+			          <ul class="dropdown-menu">
+			            
+								<li><a class="plain" href="/categories/Unit-Testing"/>Unit Testing</a></li>
+							
+								<li><a class="plain" href="/categories/MUnit"/>MUnit</a></li>
+							
+			          </ul>
+			        </li>
+			        <li>
+                        <a class="plain" href="/archive.html">All Posts</a>
+                    </li>
+                    
+                    <li>
+                        <a class="plain" href="http://eepurl.com/b-IJAD" target="_blank">Subscribe</a>
+                    </li>
+                </ul>
+            </div>
+            <!-- /.navbar-collapse -->
+        </div>
+        <!-- /.container -->
+    </nav>
+
+
+</header>
+
+
+	
+	<div class="post">
+		<h1 class="post-title">Unit Testing Mule DataWeave Scripts with MUnit</h1>
+		<p class="post-meta">Published by Manik Magar on 20 July 2016 under <a href="/categories/MUnit">MUnit</a>
+		</p>
+		
+		<div class="post-summary">
+			<p>Mule DataWeave script can do complex transformations and so must be unit tested to ensure expected results. This post will help you to get started with dataweave unit testing. </p>
+		</div>
+		<div>
+			<p class="post-content"> <p><a href="https://docs.mulesoft.com/mule-user-guide/v/3.8/dataweave">DataWeave</a> is a powerful transformation language introduced with Mule Enterprise Edition 3.7. It allows you to transform data from one format to another and supports CSV, XML, JSON, Flat/Fixed Width (v3.8+) &amp; Java. You can look at <a href="https://docs.mulesoft.com/mule-user-guide/v/3.8/dataweave-examples">these DataWeave Examples</a> to see it in action.</p>
+<p>Like any other code of programming world, it is always a good idea to unit test the DataWeave script you write. In this post, we will see how we can unit test the DataWeave code.</p>
+<h2>Writing DataWeave Script</h2>
+<p>DataWeave script can be included in two ways into Mule flow - </p>
+<h4>1. Add an inline script -</h4>
+<pre><code class="xml">&lt;dw:transform-message doc:name=&quot;Transform Message&quot;&gt;
+            &lt;dw:set-payload&gt;&lt;![CDATA[%dw 1.0
+%output application/java
+---
+{
+	employees: payload.root.*employee map {
+		
+			name: $.fname ++ &#39; &#39; ++ $.lname,
+			dob: $.dob,
+			age: (now as :string {format: &quot;yyyy&quot;}) - 
+					(($.dob as :date {format:&quot;MM-dd-yyyy&quot;}) as :string {format:&quot;yyyy&quot;})
+		
+	}
+}]]&gt;&lt;/dw:set-payload&gt;
+        &lt;/dw:transform-message&gt;
+        
+</code></pre>
+<h4>2. Add script to file (.dwl) and refer with <code>resource</code> attribute -</h4>
+<pre><code class="xml"> &lt;dw:transform-message doc:name=&quot;Transform Message&quot;&gt;
+      &lt;dw:set-payload resource=&quot;classpath:dwl/employees.dwl&quot;/&gt;
+ &lt;/dw:transform-message&gt;
+</code></pre>
+<p>I prefer using <code>resource</code> option for writing my DataWeave scripts. This has few advantages over <code>inline</code> option -</p>
+<ol>
+  <li>
+  <p>Script (.dwl) is reusable by other trasnform messages components by referring to same file.</p></li>
+  <li>
+  <p>Mule configuration xml file remains clean and readable.</p></li>
+  <li>
+  <p>Most important for us, that makes it possible to test the script as an unit of code.</p></li>
+  <li>
+  <p>Hmm, there may be more but I just don't know them yet :).</p></li>
+</ol>
+<p>​</p>
+<h2>Flow with DataWeave Script</h2>
+<p>To keep demonstration simple, we will use below flow that consumes an employees.xml and transforms it to a Java Map. During transformation it also calculate employee's age.</p>
+<pre><code class="xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+
+&lt;mule xmlns:file=&quot;http://www.mulesoft.org/schema/mule/file&quot; xmlns:dw=&quot;http://www.mulesoft.org/schema/mule/ee/dw&quot; xmlns=&quot;http://www.mulesoft.org/schema/mule/core&quot; xmlns:doc=&quot;http://www.mulesoft.org/schema/mule/documentation&quot;
+	xmlns:spring=&quot;http://www.springframework.org/schema/beans&quot; 
+	xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;
+	xsi:schemaLocation=&quot;http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd
+http://www.mulesoft.org/schema/mule/ee/dw http://www.mulesoft.org/schema/mule/ee/dw/current/dw.xsd&quot;&gt;
+
+    &lt;flow name=&quot;dataweave-testingFlow&quot;&gt;
+        &lt;file:inbound-endpoint path=&quot;input&quot; moveToDirectory=&quot;output&quot; responseTimeout=&quot;10000&quot; doc:name=&quot;File&quot;/&gt;
+        &lt;dw:transform-message doc:name=&quot;Transform Message&quot;&gt;
+            &lt;dw:set-payload resource=&quot;classpath:dwl/employees.dwl&quot;/&gt;
+        &lt;/dw:transform-message&gt;
+        &lt;logger level=&quot;INFO&quot; message=&quot;#[message.payloadAs(java.lang.String)]&quot; doc:name=&quot;Logger&quot;/&gt;
+    &lt;/flow&gt;
+&lt;/mule&gt;
+</code></pre>
+<p><strong>DataWeave Script</strong> - <code>employees.dwl</code></p>
+<pre><code>%dw 1.0
+%output application/java
+---
+employees: payload.root.*employee map {
+		
+			name: $.fname ++ &#39; &#39; ++ $.lname,
+			dob: $.dob,
+			age: (now as :string {format: &quot;yyyy&quot;}) - 
+					(($.dob as :date {format:&quot;MM-dd-yyyy&quot;}) as :string {format:&quot;yyyy&quot;})
+		
+}
+</code></pre>
+<h2>First MUnit Test</h2>
+<p>We will use <a href="https://docs.mulesoft.com/munit/v/1.2.0/">MUnit</a> for writing our unit test cases. If you haven't written any munit test cases before then you can take a look at <a href="https://docs.mulesoft.com/munit/v/1.2.0/munit-short-tutorial">MUnit Tutorial</a>.</p>
+<p>To write our first unit test, we will create a new MUnit Test suite <code>src/test/munit/dataweave-testing-test-suite.xml</code> with below code -</p>
+<pre><code class="xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+
+&lt;mule xmlns:dw=&quot;http://www.mulesoft.org/schema/mule/ee/dw&quot; xmlns=&quot;http://www.mulesoft.org/schema/mule/core&quot;
+	xmlns:doc=&quot;http://www.mulesoft.org/schema/mule/documentation&quot;
+	xmlns:munit=&quot;http://www.mulesoft.org/schema/mule/munit&quot; xmlns:spring=&quot;http://www.springframework.org/schema/beans&quot;
+	xmlns:core=&quot;http://www.mulesoft.org/schema/mule/core&quot; xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;
+	xsi:schemaLocation=&quot;http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/ee/dw http://www.mulesoft.org/schema/mule/ee/dw/current/dw.xsd&quot;&gt;
+	&lt;munit:config name=&quot;munit&quot; doc:name=&quot;MUnit configuration&quot; /&gt;
+	
+  	&lt;munit:test name=&quot;dataweave-testing-test-suite-dataweave-testingFlowTest&quot;
+		description=&quot;Test&quot;&gt;
+		&lt;munit:set
+			payload=&quot;#[getResource(&#39;sample_data/employees.xml&#39;).asStream()]&quot;
+			doc:name=&quot;Set Message&quot; mimeType=&quot;application/xml&quot; /&gt;
+		&lt;dw:transform-message doc:name=&quot;Transform Message&quot;&gt;
+			&lt;dw:set-payload resource=&quot;classpath:dwl/employees.dwl&quot; /&gt;
+		&lt;/dw:transform-message&gt;
+		&lt;munit:assert-on-equals expectedValue=&quot;#[2]&quot;
+			actualValue=&quot;#[payload.employees.size()]&quot; doc:name=&quot;Assert Equals&quot;
+			message=&quot;Missing some employees&quot; /&gt;
+		&lt;munit:assert-on-equals expectedValue=&quot;#[36]&quot;
+			actualValue=&quot;#[payload.employees[0].age]&quot; doc:name=&quot;Assert Equals&quot; /&gt;
+	&lt;/munit:test&gt;
+&lt;/mule&gt;
+
+</code></pre>
+<p>This code has a munit test <code>dataweave-testing-test-suite-dataweave-testingFlowTest</code>. You can see that we are not importing our actual flow config and that is because, we will add a <code>transform-message</code> component and refer to the same dataweave script resource <code>dwl/employees.dwl</code> that main flow uses (Reuse and unit testability of script!!). Here is what this test is doing -</p>
+<ol>
+  <li>Create a test message using sample xml file as payload. We can use MEL expression to read file as stream. <strong>We will set the mimeType of message as "application/xml".</strong></li>
+  <li>Transform the input xml to csv using <code>employees.dwl</code> script. As we are transforming it into java object, output of DW will be a HashMap with employee list.</li>
+  <li>Assert the number of employees we except in dataweave output.</li>
+  <li>For first employee record, assert the expected value of age. This will ensure that our age calculation is working as expected.</li>
+</ol>
+<blockquote>
+  <p><strong>Important:</strong> Not setting mimeType on test message will cause DataWeave to throw below exception because DataWeave will recieve the input as binary input stream and wouldn't know how to interpret content of it.</p>
+</blockquote>
+<pre><code class="java">Message               : Exception while executing: 
+	employees: payload.root.*employee map {
+	           ^
+Type mismatch for &#39;Value Selector&#39; operator
+     found :binary, :name
+  required :datetime, :name or
+  required :localdatetime, :name or
+  required :object, :name or
+  required :time, :name or
+  required :array, :name or
+  required :date, :name or
+  required :localtime, :name or
+  required :period, :name
+Element               : /dataweave-testing-test-suite-dataweave-testingFlowTest/processors/1 @ 22f3f850-4d52-11e6-b92d-1a0124cf99a6:dataweave-testing-test-suite.xml:17 (Transform Message)
+</code></pre>
+<p>Now Run this as MUnit Test case and you should see it running successfully -</p>
+<p><img src="http://image.prntscr.com/image/ac611f8e9d0a4a809c8ac8997a3187df.png" alt="MUnit Runner" /></p>
+<h2>Writing Java Unit Test Case</h2>
+<p>For those who prefer to write java instead of XML, <code>FunctionalMunitSuite</code> class can be used to write the test case.</p>
+<p>Let's create a <code>src/test/munit/dataweave-testing-munit.xml</code> mule config (not a munit xml suite) and add a test subflow with target dataweave component. We are using the same dwl resource file.</p>
+<pre><code class="xml">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+
+&lt;mule xmlns:dw=&quot;http://www.mulesoft.org/schema/mule/ee/dw&quot; xmlns=&quot;http://www.mulesoft.org/schema/mule/core&quot; xmlns:doc=&quot;http://www.mulesoft.org/schema/mule/documentation&quot;
+	xmlns:spring=&quot;http://www.springframework.org/schema/beans&quot; 
+	xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;
+	xsi:schemaLocation=&quot;http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/ee/dw http://www.mulesoft.org/schema/mule/ee/dw/current/dw.xsd&quot;&gt;
+
+    &lt;sub-flow name=&quot;dataweave-testing-suiteSub_Flow&quot;&gt;
+        &lt;dw:transform-message doc:name=&quot;Transform Message&quot;&gt;
+        	&lt;dw:set-payload resource=&quot;classpath:dwl/employees.dwl&quot;&gt;&lt;/dw:set-payload&gt;
+        &lt;/dw:transform-message&gt;
+    &lt;/sub-flow&gt;
+    
+&lt;/mule&gt;
+</code></pre>
+<p>Here is our java test case equivalent to our earlier xml test -</p>
+<pre><code class="java">package com.mms.mule.explore;
+
+import java.io.File;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.hamcrest.MatcherAssert;
+import org.hamcrest.Matchers;
+import org.junit.Test;
+import org.mule.DefaultMuleMessage;
+import org.mule.api.MuleEvent;
+import org.mule.munit.runner.functional.FunctionalMunitSuite;
+import org.mule.transformer.types.MimeTypes;
+import org.mule.util.FileUtils;
+
+public class DataWeaveTests extends FunctionalMunitSuite {
+
+	@Override
+	protected String getConfigResources() {
+		return &quot;dataweave-testing-suite.xml&quot;;
+	}
+	
+	@Test
+	public void testDW() throws Exception{
+		
+		String payload = FileUtils.readFileToString(new File(DataWeaveTests.class.getClassLoader().getResource(&quot;sample_data/employees.xml&quot;).getPath()));
+		
+		MuleEvent event = testEvent(payload);
+		//Setting MimeType is critical.
+   ((DefaultMuleMessage)event.getMessage()).setMimeType(MimeTypes.APPLICATION_XML);
+		
+      //Call our test flow
+		MuleEvent reply = runFlow(&quot;dataweave-testing-suiteSub_Flow&quot;, event);
+		
+		HashMap obj = reply.getMessage().getPayload(HashMap.class);
+		List&lt;Map&gt; lst = (List&lt;Map&gt;) obj.get(&quot;employees&quot;);
+      //Put some asserts
+		MatcherAssert.assertThat(2, Matchers.equalTo(lst.size()));
+		MatcherAssert.assertThat(36, Matchers.equalTo(lst.get(0).get(&quot;age&quot;)));
+		
+	}
+}
+</code></pre>
+<h2>Verifying CSV content output</h2>
+<p>In previous example, dataweave output was Java map which is easy to verify. How about verifying CSV ouput? There are two two ways to verify CSV output -</p>
+<h4>Verify as Strings:</h4>
+<ul>
+  <li>After DataWeave, use <code>object-to-string</code> transformer to convert output to string.</li>
+  <li>Split the content with new line (you may want to replace '\r\n' with '\n' before splitting)</li>
+  <li>Verify values in array.</li>
+</ul>
+<h4>Use another dataweave to convert csv to map and then verify the map data:</h4>
+<p>Below munit flow adds another dataweave which outputs <code>application/java</code> and script is as simple as <code>(payload)</code> which converts the csv as is to java map. You can see in second debug screenshot below -</p>
+<pre><code class="xml">&lt;munit:test name=&quot;dataweave-testing-test-suite-dataweave-csv-testingFlowTest&quot;
+		description=&quot;Test&quot;&gt;
+		&lt;munit:set
+			payload=&quot;#[getResource(&#39;sample_data/employees.xml&#39;).asStream()]&quot;
+			doc:name=&quot;Set Message&quot; mimeType=&quot;application/xml&quot; /&gt;
+		&lt;dw:transform-message doc:name=&quot;Transform Message&quot;&gt;
+			&lt;dw:set-payload resource=&quot;classpath:dwl/employees2.dwl&quot; /&gt;
+		&lt;/dw:transform-message&gt;
+        &lt;dw:transform-message doc:name=&quot;Transform Message&quot;&gt;
+            &lt;dw:set-payload&gt;&lt;![CDATA[%dw 1.0
+%output application/java
+---
+(payload)]]&gt;&lt;/dw:set-payload&gt;
+        &lt;/dw:transform-message&gt;
+		&lt;munit:assert-on-equals expectedValue=&quot;#[2]&quot;
+			actualValue=&quot;#[payload.size()]&quot; doc:name=&quot;Assert Equals&quot;
+			message=&quot;Missing some employees&quot; /&gt;
+		&lt;munit:assert-on-equals expectedValue=&quot;#[&#39;36&#39;]&quot;
+			actualValue=&quot;#[payload[0].age]&quot; doc:name=&quot;Assert Equals&quot; /&gt;
+	&lt;/munit:test&gt;
+</code></pre>
+<p><img src="http://image.prntscr.com/image/0ef71e30d1e840bda3069a2531d607ec.png" alt="MUnit Testing for DataWeave CSV" /></p>
+<p>If you look at the second assert that verifies age and compare with that of earlier java testing, you will notice that expected value is defined as string literal <code>#[&#39;36&#39;]</code> vs. number <code>#[36]</code>. <strong>This is because, all values from CSV are transformed as String data type in MAP</strong> and <code>#[36]</code> would cause test case to fail. To have strongly typed values, we can write a full mapping in second dataweave but I am skipping that step for now.</p>
+<p>With this minimal setup, you can verify the data in your munit.</p>
+<h2>Troubleshooting</h2>
+<h3>org.threeten.bp.zone.TzdbZoneRulesProvider could not be instantiated while running Java Test case</h3>
+<p>If you are manipulating dates in your dataweave script and writing test cases in java, then you may see tests failing with below error -</p>
+<pre><code class="java">org.mule.api.MessagingException: org.threeten.bp.zone.ZoneRulesProvider: Provider org.threeten.bp.zone.TzdbZoneRulesProvider could not be instantiated (java.util.ServiceConfigurationError).
+	at org.mule.execution.ExceptionToMessagingExceptionExecutionInterceptor.execute(ExceptionToMessagingExceptionExecutionInterceptor.java:42)
+	at org.mule.execution.MessageProcessorNotificationExecutionInterceptor.execute(MessageProcessorNotificationExecutionInterceptor.java:108)
+  ...
+Caused by: java.util.ServiceConfigurationError: org.threeten.bp.zone.ZoneRulesProvider: Provider org.threeten.bp.zone.TzdbZoneRulesProvider could not be instantiated
+	at java.util.ServiceLoader.fail(ServiceLoader.java:232)
+	at java.util.ServiceLoader.access$100(ServiceLoader.java:185)
+  ...
+Caused by: org.threeten.bp.zone.ZoneRulesException: Unable to load TZDB time-zone rules: jar:file:/Users/manik/.m2/repository/org/threeten/threetenbp/1.2/threetenbp-1.2.jar!/org/threeten/bp/TZDB.dat
+	at org.threeten.bp.zone.TzdbZoneRulesProvider.load(TzdbZoneRulesProvider.java:146)
+	at org.threeten.bp.zone.TzdbZoneRulesProvider.&lt;init&gt;(TzdbZoneRulesProvider.java:87)
+  ...
+Caused by: org.threeten.bp.zone.ZoneRulesException: Data already loaded for TZDB time-zone rules version: 2014i
+	at org.threeten.bp.zone.TzdbZoneRulesProvider.load(TzdbZoneRulesProvider.java:139)
+	... 87 more
+</code></pre>
+<p><strong>Resolution:</strong> This error is thrown when threetenbp library gets loaded twice. <code>TzdbZoneRulesProvider</code> is already available in java runtime and dataweave pulls this jar as its dependency. Simple resolution is to exclude this from maven dependency, modify dataweave plugin dependency in your pom -</p>
+<pre><code class="xml">		&lt;dependency&gt;
+			&lt;groupId&gt;com.mulesoft.weave&lt;/groupId&gt;
+			&lt;artifactId&gt;mule-plugin-weave_2.11&lt;/artifactId&gt;
+			&lt;version&gt;${mule.version}&lt;/version&gt;
+			&lt;scope&gt;provided&lt;/scope&gt;
+			&lt;exclusions&gt;
+				&lt;exclusion&gt;
+					&lt;groupId&gt;org.threeten&lt;/groupId&gt;
+					&lt;artifactId&gt;threetenbp&lt;/artifactId&gt;
+				&lt;/exclusion&gt;
+			&lt;/exclusions&gt;
+		&lt;/dependency&gt;
+</code></pre>
+<h3>ArrayIndexOutOfBound Exception when setting CSV payload</h3>
+<p>If you are testing CSV input payload with dataweave on windows, then you may get <code>ArrayIndexOutOfBound</code> exception. I think this is a bug due windows formatted EOL (\r\n) characters.</p>
+<p><strong>Resolution:</strong> You can use tools like notepad++ or dos2unix to convert your file to UNIX (\n) EOL format. I usually like to do it like below which makes test compatible with both formats -</p>
+<pre><code class="java">String payload = FileUtils.readFileToString(new File(DataWeaveTests.class.getClassLoader().getResource(&quot;sample_data/employees.csv&quot;).getPath()));
+payload = payload.replace(&quot;\r\n&quot;, &quot;\n&quot;);
+</code></pre>
+<h2>Source Code</h2>
+<p>Test Application source code is available on Github <a href="https://github.com/UnitTesters/explore-mule">here</a></p>
+<h2>Conclusion</h2>
+<p>Unit Testing is crucial part of any software development. Mule ESB provides numerous components for system integrations and data transformation. In this post, we saw how we can write unit test cases for DataWeave (Transform Message) component and ensure the transformed data is as per expecations. I hope this will help you to write (almost) bug-free scripts :).</p>
+<p>Feel free to comment and let me know your thoughts or questions. </p> </p>
+		</div>
+		<p class="post-tags"> Tags:  <a href="/tags/DataWeave.html">DataWeave</a> <a href="/tags/Transform-Message.html">Transform-Message</a> <a href="/tags/Mule-ESB.html">Mule-ESB</a>  </p>
+		<div class="social">
+<div class="container">
+    <div class="btn-group">
+        <button class="btn btn-default disabled">Share:</button> 
+        <a class="btn btn-default" target="_blank" title="Like On Facebook" href="http://www.facebook.com/plugins/like.php?href=https://unittesters.com/blog/2016/07/20/Unit-Testing-Mule-DataWeave-Scripts-with-MUnit/">
+            <i class="fa fa-thumbs-o-up fa-lg fb"></i>
+        </a>
+        <a class="btn btn-default" target="_blank" title="On Facebook" href="http://www.facebook.com/sharer.php?u=https://unittesters.com/blog/2016/07/20/Unit-Testing-Mule-DataWeave-Scripts-with-MUnit/&amp;t=Unit Testing Mule DataWeave Scripts with MUnit">
+            <i class="fa fa-facebook fa-lg fb"></i>
+        </a>
+        <a class="btn btn-default" target="_blank" title="On Twitter" href="http://twitter.com/share?url=https://unittesters.com/blog/2016/07/20/Unit-Testing-Mule-DataWeave-Scripts-with-MUnit/&amp;text=Unit Testing Mule DataWeave Scripts with MUnit">
+            <i class="fa fa-twitter fa-lg tw"></i>
+        </a>
+        <a class="btn btn-default" target="_blank" title="On Google Plus" href="https://plusone.google.com/_/+1/confirm?hl=en&amp;url=https://unittesters.com/blog/2016/07/20/Unit-Testing-Mule-DataWeave-Scripts-with-MUnit/">
+            <i class="fa fa-google-plus fa-lg google"></i>
+        </a>
+        <a class="btn btn-default" target="_blank" title="On LinkedIn" href="http://www.linkedin.com/shareArticle?mini=true&amp;url=https://unittesters.com/blog/2016/07/20/Unit-Testing-Mule-DataWeave-Scripts-with-MUnit/">
+            <i class="fa fa-linkedin fa-lg linkin"></i>
+        </a>
+        <a class="btn btn-default" target="_blank" title="Pin It" href="http://www.pinterest.com/pin/create/button/?url=https://unittesters.com/blog/2016/07/20/Unit-Testing-Mule-DataWeave-Scripts-with-MUnit/&amp;media=null&amp;description=Unit Testing Mule DataWeave Scripts with MUnit">
+            <i class="fa fa-pinterest fa-lg pinterest"></i>
+        </a>
+    </div>
+</div>
+</div>
+		
+	</div>
+	
+	
+<section class="disqus">
+  <div id="disqus_thread"></div>
+  <script type="text/javascript">
+    var disqus_shortname = 'unittesters';
+
+    /* * * DON'T EDIT BELOW THIS LINE * * */
+    (function() {
+        var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+        dsq.src = '//' + disqus_shortname + '.disqus.com/embed.js';
+        (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    })();
+  </script>
+  <noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+  <a href="http://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+</section>
+
+
+	
+		<div id="tagsCloud">
+			<hr/>
+			<h4>Tags Cloud</h4>
+			
+				<a class="plain" href="/tags/flow-variables.html"/>flow-variables</a> | 
+			
+				<a class="plain" href="/tags/munit.html"/>munit</a> | 
+			
+				<a class="plain" href="/tags/Transform-Message.html"/>Transform-Message</a> | 
+			
+				<a class="plain" href="/tags/DataWeave.html"/>DataWeave</a> | 
+			
+				<a class="plain" href="/tags/FunctionalMunitSuite.html"/>FunctionalMunitSuite</a> | 
+			
+				<a class="plain" href="/tags/Mule-ESB.html"/>Mule-ESB</a> | 
+			
+				<a class="plain" href="/tags/Properties-placeholder.html"/>Properties-placeholder</a> | 
+			
+				<a class="plain" href="/tags/Testing.html"/>Testing</a> | 
+			
+		
+		<div>
+		<div id="push"></div>
+
+			
+		<div id="mailChimp">
+				
+		
+		</div>
+		
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-78784632-1', 'auto');
+  ga('send', 'pageview', {
+    'page': 'blog/2016/07/20/Unit-Testing-Mule-DataWeave-Scripts-with-MUnit/ ',
+    'title': 'Unit Testing Mule DataWeave Scripts with MUnit '
+      });
+
+</script>
+
+
+
+		<footer>
+					<hr/>
+			<p class="muted credit">UnitTesters.com &copy; 2016 | Baked with <a href="https://github.com/myjavaacademy/jbake">JBake</a> | <a href="/sitemap.xml">Sitemap </a> | <a href="/terms-usage-privacy/">Terms of Use and Privacy Policy</a> | <a class="plain" href="/feed.xml"><i class="fa fa-rss-square" aria-hidden="true"></i> RSS Feed</a></p>
+	       
+		</footer>
+
+  
+  </body>
+</html>
+

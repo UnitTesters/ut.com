@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9 http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
+
+    <url>
+    	<loc>https://unittesters.com/terms-usage-privacy/</loc>
+    	<lastmod>2016-01-01</lastmod>
+    </url>
+
+    <url>
+    	<loc>https://unittesters.com/blog/2016/09/27/Unit-Testing-DataWeave-JSON-Output-with-MUnit/</loc>
+    	<lastmod>2016-09-27</lastmod>
+    </url>
+
+    <url>
+    	<loc>https://unittesters.com/blog/2016/07/24/overriding-properties-in-munit-xml-java-for-testing/</loc>
+    	<lastmod>2016-07-24</lastmod>
+    </url>
+
+    <url>
+    	<loc>https://unittesters.com/blog/2016/07/20/Unit-Testing-Mule-DataWeave-Scripts-with-MUnit/</loc>
+    	<lastmod>2016-07-20</lastmod>
+    </url>
+
+    <url>
+    	<loc>https://unittesters.com/blog/mule-munit-testing-variables-properties/</loc>
+    	<lastmod>2016-05-30</lastmod>
+    </url>
+
+    <url>
+    	<loc>https://unittesters.com/blog/what-is-unit-testing/</loc>
+    	<lastmod>2016-05-21</lastmod>
+    </url>
+
+</urlset>
